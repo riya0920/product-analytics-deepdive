@@ -1,0 +1,164 @@
+{
+  "question": "Where do we lose new users in week one, and what is it worth to fix?",
+  "funnel": [
+    {
+      "step_index": 1,
+      "step": "signup",
+      "users_reached": 59771,
+      "users_previous_step": null,
+      "step_conversion": NaN,
+      "cumulative_conversion": 1.0,
+      "users_lost": null,
+      "max_recoverable_revenue": NaN
+    },
+    {
+      "step_index": 2,
+      "step": "activate",
+      "users_reached": 43731,
+      "users_previous_step": 59771,
+      "step_conversion": 0.7316,
+      "cumulative_conversion": 0.7316,
+      "users_lost": 16040,
+      "max_recoverable_revenue": 667006.39
+    },
+    {
+      "step_index": 3,
+      "step": "first_search",
+      "users_reached": 37232,
+      "users_previous_step": 43731,
+      "step_conversion": 0.8514,
+      "cumulative_conversion": 0.6229,
+      "users_lost": 6499,
+      "max_recoverable_revenue": 270254.02
+    },
+    {
+      "step_index": 4,
+      "step": "add_to_cart",
+      "users_reached": 18568,
+      "users_previous_step": 37232,
+      "step_conversion": 0.4987,
+      "cumulative_conversion": 0.3107,
+      "users_lost": 18664,
+      "max_recoverable_revenue": 776122.64
+    },
+    {
+      "step_index": 5,
+      "step": "purchase",
+      "users_reached": 11877,
+      "users_previous_step": 18568,
+      "step_conversion": 0.6396,
+      "cumulative_conversion": 0.1987,
+      "users_lost": 6691,
+      "max_recoverable_revenue": 278238.14
+    }
+  ],
+  "retention_by_channel": [
+    {
+      "channel": "referral",
+      "users_all_cohorts": 7036.0,
+      "eligible_d1": 7036.0,
+      "d1_exact_rate": 0.5281,
+      "d7_plus_rate": 0.8513,
+      "eligible_d30": 7036.0,
+      "d30_plus_rate": 0.251
+    },
+    {
+      "channel": "organic",
+      "users_all_cohorts": 20245.0,
+      "eligible_d1": 20245.0,
+      "d1_exact_rate": 0.4954,
+      "d7_plus_rate": 0.8248,
+      "eligible_d30": 20245.0,
+      "d30_plus_rate": 0.2532
+    },
+    {
+      "channel": "email",
+      "users_all_cohorts": 6076.0,
+      "eligible_d1": 6076.0,
+      "d1_exact_rate": 0.4501,
+      "d7_plus_rate": 0.8041,
+      "eligible_d30": 6076.0,
+      "d30_plus_rate": 0.2444
+    },
+    {
+      "channel": "social",
+      "users_all_cohorts": 10941.0,
+      "eligible_d1": 10941.0,
+      "d1_exact_rate": 0.3369,
+      "d7_plus_rate": 0.7329,
+      "eligible_d30": 10941.0,
+      "d30_plus_rate": 0.2216
+    },
+    {
+      "channel": "paid_search",
+      "users_all_cohorts": 15700.0,
+      "eligible_d1": 15700.0,
+      "d1_exact_rate": 0.309,
+      "d7_plus_rate": 0.7038,
+      "eligible_d30": 15700.0,
+      "d30_plus_rate": 0.2161
+    }
+  ],
+  "week_one": {
+    "users": 59998,
+    "lost_in_week_one": 13354,
+    "week_one_loss_rate": 0.2226
+  },
+  "channel_comparison": {
+    "organic_rate": 0.29844406026179304,
+    "paid_search_rate": 0.05878980891719745,
+    "absolute_difference": -0.2396542513445956,
+    "relative_difference": -0.8030123003097216,
+    "ci95_absolute": [
+      -0.2469527163862234,
+      -0.23235578630296777
+    ],
+    "p_value": 0.0,
+    "n_organic": 20245,
+    "n_paid_search": 15700,
+    "method": "two-proportion z-test, pooled SE for the p-value, unpooled SE for the CI"
+  },
+  "opportunity": {
+    "worst_step": "add_to_cart",
+    "users_lost_at_worst_step": 18664,
+    "step_conversion": 0.4987,
+    "arpu_per_purchaser": 41.583939313216796,
+    "downstream_purchase_rate_from_worst_step": 0.639648858250754,
+    "scenarios": {
+      "conservative": {
+        "recovery_rate_assumed": 0.05,
+        "users_recovered": 933,
+        "incremental_purchasers": 597,
+        "incremental_revenue": 24822.3
+      },
+      "central": {
+        "recovery_rate_assumed": 0.1,
+        "users_recovered": 1866,
+        "incremental_purchasers": 1194,
+        "incremental_revenue": 49644.6
+      },
+      "optimistic": {
+        "recovery_rate_assumed": 0.2,
+        "users_recovered": 3733,
+        "incremental_purchasers": 2388,
+        "incremental_revenue": 99289.19
+      }
+    },
+    "assumptions": [
+      "Recovered users convert downstream at the SAME rate as users who already passed the step. This is optimistic: users who dropped are systematically less engaged, so treat every figure as an upper bound.",
+      "ARPU per purchaser is computed over the full observation window, not a fixed horizon, so late cohorts contribute less revenue and the figure is mildly understated.",
+      "No cost of the fix is included. The number is gross opportunity, not ROI.",
+      "Revenue is simulated. The magnitude is only meaningful relative to other numbers in this dataset, never as a real-world dollar claim."
+    ]
+  },
+  "data_quality": {
+    "raw_rows": 380798,
+    "clean_rows": 373691,
+    "rows_removed": 7107,
+    "duplicate_rows": 5613.0,
+    "duplicate_rate": 0.01474,
+    "null_user_rows": 1494,
+    "null_user_rate": 0.00392,
+    "clean_users": 59998
+  }
+}
