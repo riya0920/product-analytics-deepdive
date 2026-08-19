@@ -1,0 +1,3 @@
+# Intentionally empty. dbt_utils would give us surrogate keys and a few test
+# macros, but every test this project needs is either built in or three lines of
+# SQL, and a dependency that saves three lines is not worth the version pin.

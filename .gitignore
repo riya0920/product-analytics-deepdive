@@ -3,3 +3,6 @@ __pycache__/
 .pytest_cache/
 data/*.parquet
 data/*.duckdb
+dbt/target/
+dbt/logs/
+dbt/dbt_packages/

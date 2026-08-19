@@ -1,0 +1,20 @@
+version: 2
+
+sources:
+  - name: raw
+    description: >
+      Raw event stream as landed by the generator. Deliberately dirty: duplicate
+      beacons, an ios timezone bug, and consent-blocked rows with a null user_id.
+    schema: main
+    tables:
+      - name: raw_events
+        description: One row per received event, in arrival order, defects intact.
+        columns:
+          - name: event_id
+            description: Surrogate id assigned on receipt. NOT stable across retries.
+            data_tests: [unique, not_null]
+          - name: user_id
+            description: Null for consent-blocked clients (~0.4%), removed in staging.
+          - name: event_ts
+            description: Client-stamped. ios rows are shifted -8h by the planted bug.
+            data_tests: [not_null]

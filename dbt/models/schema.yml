@@ -1,0 +1,105 @@
+version: 2
+
+models:
+  - name: stg_events
+    description: >
+      The only place raw events are cleaned. Deduplicates on the NATURAL key
+      (user_id, event_name, event_ts) rather than event_id, because retried
+      client beacons carry a fresh event_id and a surrogate-key dedupe would
+      find nothing while leaving every count inflated. Also corrects the ios
+      timezone bug and drops consent-blocked rows.
+    columns:
+      - name: event_id
+        description: Surrogate id of the surviving row for this natural key.
+        data_tests: [unique, not_null]
+      - name: user_id
+        description: Never null here; nulls are excluded and counted in audit_data_quality.
+        data_tests: [not_null]
+      - name: event_name
+        description: Funnel step or session_start.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [signup, activate, first_search, add_to_cart, purchase, session_start]
+      - name: event_ts
+        description: UTC. The ios -8h shift has been undone.
+        data_tests: [not_null]
+      - name: platform
+        data_tests:
+          - accepted_values:
+              values: [ios, android, web]
+      - name: revenue
+        description: Non-negative; only purchase events carry a value.
+
+  - name: stg_users
+    description: >
+      One row per user with acquisition attributes fixed at FIRST touch.
+      Re-attributing to the latest value would silently move users between
+      cohorts over time, so historical retention curves would change on every
+      re-run.
+    columns:
+      - name: user_id
+        data_tests: [unique, not_null]
+      - name: signup_ts
+        data_tests: [not_null]
+      - name: channel
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: [organic, paid_search, social, referral, email]
+
+  - name: mart_sessions
+    description: >
+      Sessionised with a 30-minute inactivity gap via LAG + a running SUM over
+      the new-session flag.
+    columns:
+      - name: session_id
+        data_tests: [unique, not_null]
+      - name: user_id
+        data_tests:
+          - not_null
+          - relationships:
+              to: ref('stg_users')
+              field: user_id
+      - name: session_seconds
+        description: Zero for single-event sessions, never negative.
+
+  - name: mart_funnel
+    description: >
+      Per-step conversion with drop-off quantified in users and dollars. Steps
+      are "ever reached", not "reached in one session" -- over a 120-day window a
+      session-scoped funnel would report users coming back tomorrow as drop-off.
+    columns:
+      - name: step
+        data_tests: [unique, not_null]
+      - name: step_conversion
+        description: Users at this step / users at the previous step. Null for signup.
+      - name: max_recoverable_revenue
+        description: >
+          UPPER BOUND. Assumes recovered users convert downstream at the rate of
+          users who already passed the step, which they will not.
+
+  - name: mart_retention
+    description: >
+      D1/D7/D30 by signup cohort and channel. Emits BOTH exact-day and
+      day-or-later definitions, because the two disagree and papering over that
+      is how retention numbers stop being comparable between teams.
+    columns:
+      - name: cohort_users
+        data_tests: [not_null]
+      - name: d1_exact_rate
+        description: Fraction active on exactly day 1.
+      - name: d30_plus_rate
+        description: >
+          Fraction active on day 30 or later. Right-censored cohorts must be
+          excluded per horizon by the consumer; see analysis.retention_by_channel.
+
+  - name: audit_data_quality
+    description: >
+      What the cleaning removed, quantified. An analysis that cleans data without
+      reporting what it cleaned is asking the reader to trust an invisible step.
+    columns:
+      - name: duplicate_rate
+        description: Should recover the planted ~1.5%.
+      - name: null_user_rate
+        description: Should recover the planted ~0.4%.
