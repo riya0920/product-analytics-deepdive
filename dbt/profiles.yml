@@ -1,0 +1,7 @@
+product_analytics:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: ../data/warehouse_dbt.duckdb
+      threads: 4
