@@ -1,0 +1,92 @@
+{
+  "hardware": {
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 126 Stepping 5, GenuineIntel",
+    "cpu_count": 8
+  },
+  "engine": "duckdb (in-process, single node)",
+  "table_bytes": {
+    "base": {
+      "parquet_bytes": 5387080,
+      "rows": 373691,
+      "columns": 8,
+      "bytes_vs_base": 1.0
+    },
+    "clustered": {
+      "parquet_bytes": 4896928,
+      "rows": 373691,
+      "columns": 8,
+      "bytes_vs_base": 0.909
+    },
+    "narrow": {
+      "parquet_bytes": 3595732,
+      "rows": 373691,
+      "columns": 3,
+      "bytes_vs_base": 0.667
+    }
+  },
+  "queries": {
+    "sessionise": {
+      "base": {
+        "median_s": 0.36678199999732897,
+        "min_s": 0.3519296000013128,
+        "max_s": 0.4480430000112392,
+        "repeats": 5,
+        "speedup_vs_base": 1.0
+      },
+      "clustered": {
+        "median_s": 0.3358009000075981,
+        "min_s": 0.3279006999800913,
+        "max_s": 0.3898254999658093,
+        "repeats": 5,
+        "speedup_vs_base": 1.092
+      },
+      "narrow": {
+        "skipped": "projection lacks the columns this query needs"
+      }
+    },
+    "funnel_counts": {
+      "base": {
+        "median_s": 0.040977199969347566,
+        "min_s": 0.03562069998588413,
+        "max_s": 0.05055519996676594,
+        "repeats": 5,
+        "speedup_vs_base": 1.0
+      },
+      "clustered": {
+        "median_s": 0.04216760001145303,
+        "min_s": 0.03720580000663176,
+        "max_s": 0.05192099994746968,
+        "repeats": 5,
+        "speedup_vs_base": 0.972
+      },
+      "narrow": {
+        "median_s": 0.0432254999759607,
+        "min_s": 0.038435199996456504,
+        "max_s": 0.06367450003745034,
+        "repeats": 5,
+        "speedup_vs_base": 0.948
+      }
+    },
+    "one_day_slice": {
+      "base": {
+        "median_s": 0.11804339999798685,
+        "min_s": 0.09342490002745762,
+        "max_s": 0.13534780003828928,
+        "repeats": 5,
+        "speedup_vs_base": 1.0
+      },
+      "clustered": {
+        "median_s": 0.09915780002484098,
+        "min_s": 0.09328319999622181,
+        "max_s": 0.10532380000222474,
+        "repeats": 5,
+        "speedup_vs_base": 1.19
+      },
+      "narrow": {
+        "skipped": "projection lacks the columns this query needs"
+      }
+    }
+  },
+  "caveat": "DuckDB is a vectorised in-memory engine on a single node. Physical layout matters far less here than it does on a distributed warehouse reading from object storage, so a small speedup here can be a large one on BigQuery."
+}
