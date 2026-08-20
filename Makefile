@@ -17,3 +17,5 @@ dbt:
 dbt-docs:
 	cd dbt && DBT_PROFILES_DIR=. python -m dbt.cli.main docs generate
 all: generate build test analysis charts
+query-perf:
+	PYTHONPATH=src python -m analytics.query_perf --repeats 5

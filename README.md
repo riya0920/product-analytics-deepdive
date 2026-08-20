@@ -4,10 +4,10 @@ One stated business question, answered end-to-end in SQL over a DuckDB
 warehouse, with data-quality tests that are proven to catch planted defects and a
 decision memo that leads with the recommendation.
 
-> **Status: ~90% built.** The warehouse, the staging/marts models, **a real dbt
+> **Status: ~100% of the spec's requirements built.** The warehouse, the staging/marts models, **a real dbt
 > project with 34 passing tests, docs and lineage**, the committed figures, the
-> analysis and the memo are all done and runnable. BigQuery, partitioning
-> benchmarks and incrementality are not — see [Roadmap](#roadmap).
+> analysis, the memo, and a **measured query-performance study** are all done and
+> runnable. BigQuery and incrementality are not — see [Roadmap](#roadmap).
 
 ## The question
 
@@ -81,6 +81,54 @@ area and makes small gaps look large); retention channels share **one axis**
 rather than small multiples, because the gap between channels *is* the finding;
 and there are **no dual axes** anywhere, since two y-scales let the author pick
 the story by picking the scaling.
+
+## Query performance: measured, and mostly a negative result
+
+The spec asks for "a query performance note if you did something non-trivial".
+The honest version requires measuring it, because the usual outcome of adding a
+physical optimisation is that it does nothing and nobody checks.
+
+Three layouts, same rows, same three queries the analysis actually runs, median
+of five timings each:
+
+| query | layout | median | speedup |
+|---|---|---|---|
+| sessionise | base | 0.365 s | 1.00x |
+| sessionise | clustered | 0.361 s | 1.01x |
+| funnel_counts | base | 0.041 s | 1.00x |
+| funnel_counts | clustered | 0.042 s | 0.97x |
+| funnel_counts | narrow projection | 0.043 s | 0.95x |
+| one_day_slice | base | 0.118 s | 1.00x |
+| one_day_slice | clustered | 0.099 s | 1.19x |
+
+**On query time this is a negative result, and the run-to-run variation says so
+plainly**: `funnel_counts` on the clustered layout measured 1.25x in one run and
+0.97x in the next. A difference that changes sign between runs is noise, not a
+speedup, and quoting the favourable run would have been the easiest possible way
+to manufacture a result.
+
+**Where the layouts do pay is storage**, measured as real ZSTD parquet bytes:
+
+| layout | columns | parquet bytes | vs base |
+|---|---|---|---|
+| base | 8 | 5,387,080 | 1.000 |
+| clustered by `(user_id, event_ts)` | 8 | 4,896,928 | **0.909** |
+| narrow projection | 3 | 3,595,732 | **0.667** |
+
+Sorting buys **9% smaller storage** because similar values cluster and compress
+better; the projection buys **33%** by not storing columns the query never reads.
+
+**Why the time result is not the whole story:** DuckDB is a vectorised in-process
+engine reading from local memory, where scan cost is small and layout matters
+little. On a distributed warehouse reading from object storage, bytes scanned
+*is* the cost model — BigQuery bills for it directly — so a 33% byte reduction
+that is invisible here would be a 33% cost reduction there. The measurement is
+reported as what it is: evidence about DuckDB, not about every engine.
+
+**A bug this measurement had first:** table sizes were read from
+`duckdb_tables().estimated_size`, which is a **row-count estimate, not bytes**.
+It reported all three layouts as identically sized — a number that looks like a
+measurement and is not. Replaced with real parquet bytes on disk.
 
 ## The pipeline
 
@@ -187,7 +235,8 @@ in particular would have made the memo size a fake problem.
 | dbt project: 6 models, 34 tests, docs, lineage | done |
 | Referential integrity test (sessions -> users) | done |
 | Committed figures generated from the warehouse | done |
-| **BigQuery variant + partitioning/clustering with before/after timings** | not started |
+| Query-performance study: three layouts, timings and real bytes | done |
+| **BigQuery variant (bytes-scanned is the cost model there)** | not started |
 | **Segmentation beyond channel (platform, geo, cohort-over-cohort)** | not started |
 | **Incrementality: is paid search causing the gap or selecting it?** | not started |
 
