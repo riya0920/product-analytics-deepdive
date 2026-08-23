@@ -1,0 +1,36 @@
+{
+  "randomisation_unit": "geo",
+  "n_geos_available": 60,
+  "users_per_geo_per_week": 900,
+  "users_per_week_total": 54000,
+  "between_geo_sd": 0.045,
+  "mde_at_current_geo_count": 0.03255147868385599,
+  "target_lift": 0.02,
+  "geos_needed_for_target_lift": 159,
+  "feasible_with_available_geos": false,
+  "cuped_on_pre_period": {
+    "rho_0.00": {
+      "effective_sd": 0.045,
+      "mde": 0.03255147868385599,
+      "geos_needed_for_target": 159
+    },
+    "rho_0.50": {
+      "effective_sd": 0.03897114317029973,
+      "mde": 0.028190407470966926,
+      "geos_needed_for_target": 120
+    },
+    "rho_0.70": {
+      "effective_sd": 0.032136427928442825,
+      "mde": 0.023246405526399574,
+      "geos_needed_for_target": 82
+    },
+    "rho_0.85": {
+      "effective_sd": 0.023705220943918665,
+      "mde": 0.017147555427823664,
+      "geos_needed_for_target": 45
+    }
+  },
+  "min_pre_period_rho_to_hit_target": 0.7889858148792773,
+  "note": "with 60 geos the study can only detect a 3.3 point change; detecting the 2.0 point target needs 159 geos, or pre-period adjustment at rho>=0.79 -- and a geo's own retention history correlating that well with its next four weeks is an assumption to check, not to assume. The 54,000 users per week are irrelevant to the power; the effective n is the geo count.",
+  "what_it_cannot_do": "a geo holdout measures the effect of TURNING PAID SEARCH OFF, which is the decision-relevant quantity but is not the same as the effect of a paid-search user being a paid-search user. Organic pickup means the two differ, and the holdout measures the one worth knowing."
+}

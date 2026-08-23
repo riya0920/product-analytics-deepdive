@@ -1,4 +1,4 @@
-.PHONY: generate build test analysis prove charts dbt dbt-docs all
+.PHONY: generate build test analysis prove charts dbt dbt-docs all segments incrementality geo-design
 generate:
 	PYTHONPATH=src python -m analytics.generate --users 60000 --days 120
 build:
@@ -19,3 +19,9 @@ dbt-docs:
 all: generate build test analysis charts
 query-perf:
 	PYTHONPATH=src python -m analytics.query_perf --repeats 5
+segments:
+	PYTHONPATH=src python -m analytics.segments
+incrementality:
+	PYTHONPATH=src python -m analytics.incrementality validate
+geo-design:
+	PYTHONPATH=src python -m analytics.incrementality design

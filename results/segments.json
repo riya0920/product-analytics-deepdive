@@ -1,0 +1,268 @@
+{
+  "min_cell_size": 300,
+  "cells_total": 15,
+  "cells_excluded_as_thin": 0,
+  "gap_within_platforms": {
+    "focus": "paid_search",
+    "baseline": "organic",
+    "overall_gap": {
+      "diff": -0.121023984848032,
+      "se": 0.004518168228060164,
+      "ci_low": -0.12987959457502993,
+      "ci_high": -0.11216837512103409,
+      "significant": true
+    },
+    "per_platform": [
+      {
+        "platform": "android",
+        "focus_rate": 0.6948162111215834,
+        "baseline_rate": 0.8239754994895727,
+        "n_focus": 5305,
+        "n_baseline": 6857,
+        "diff": -0.1291592883679893,
+        "se": 0.00781813157780825,
+        "ci_low": -0.14448282626049347,
+        "ci_high": -0.11383575047548512,
+        "significant": true
+      },
+      {
+        "platform": "ios",
+        "focus_rate": 0.7118336359135171,
+        "baseline_rate": 0.8251196481697064,
+        "n_focus": 6059,
+        "n_baseline": 7731,
+        "diff": -0.11328601225618928,
+        "se": 0.007247040772214586,
+        "ci_low": -0.12749021216972986,
+        "ci_high": -0.09908181234264869,
+        "significant": true
+      },
+      {
+        "platform": "web",
+        "focus_rate": 0.7036439114391144,
+        "baseline_rate": 0.8255258971186141,
+        "n_focus": 4336,
+        "n_baseline": 5657,
+        "diff": -0.1218819856794997,
+        "se": 0.008576334892438362,
+        "ci_low": -0.1386916020686789,
+        "ci_high": -0.10507236929032052,
+        "significant": true
+      }
+    ],
+    "gap_holds_within_every_platform": true,
+    "verdict": "the gap is present and significant inside every platform, so it is not a platform-mix artifact"
+  },
+  "simpson": {
+    "pairs_checked": 10,
+    "reversals_found": 0,
+    "reversals": [],
+    "verdict": "no Simpson reversal: every aggregate channel comparison keeps its sign inside every platform"
+  },
+  "cohort_over_cohort": {
+    "weeks_reported": 18,
+    "weeks_excluded_thin": 0,
+    "series": [
+      {
+        "week": "2025-12-29 00:00:00-05:00",
+        "gap": -0.10603386122367797,
+        "se": 0.023814604727155554,
+        "n_focus": 551,
+        "n_baseline": 657
+      },
+      {
+        "week": "2026-01-05 00:00:00-05:00",
+        "gap": -0.0959816710450826,
+        "se": 0.018551950194320967,
+        "n_focus": 912,
+        "n_baseline": 1162
+      },
+      {
+        "week": "2026-01-12 00:00:00-05:00",
+        "gap": -0.10215101978067032,
+        "se": 0.019144846959949533,
+        "n_focus": 887,
+        "n_baseline": 1232
+      },
+      {
+        "week": "2026-01-19 00:00:00-05:00",
+        "gap": -0.14621412803532008,
+        "se": 0.0189163225894566,
+        "n_focus": 906,
+        "n_baseline": 1200
+      },
+      {
+        "week": "2026-01-26 00:00:00-05:00",
+        "gap": -0.1191714079315781,
+        "se": 0.018226555610180165,
+        "n_focus": 953,
+        "n_baseline": 1194
+      },
+      {
+        "week": "2026-02-02 00:00:00-05:00",
+        "gap": -0.10492745276654103,
+        "se": 0.01847986649857928,
+        "n_focus": 919,
+        "n_baseline": 1179
+      },
+      {
+        "week": "2026-02-09 00:00:00-05:00",
+        "gap": -0.10014229961818621,
+        "se": 0.018756502007001106,
+        "n_focus": 885,
+        "n_baseline": 1203
+      },
+      {
+        "week": "2026-02-16 00:00:00-05:00",
+        "gap": -0.1226114790092322,
+        "se": 0.01779204268989464,
+        "n_focus": 953,
+        "n_baseline": 1190
+      },
+      {
+        "week": "2026-02-23 00:00:00-05:00",
+        "gap": -0.1185468753083253,
+        "se": 0.018797423325742448,
+        "n_focus": 935,
+        "n_baseline": 1084
+      },
+      {
+        "week": "2026-03-02 00:00:00-05:00",
+        "gap": -0.13965740142210736,
+        "se": 0.018931072325835643,
+        "n_focus": 884,
+        "n_baseline": 1225
+      },
+      {
+        "week": "2026-03-09 00:00:00-04:00",
+        "gap": -0.10863537334125561,
+        "se": 0.018564968369135317,
+        "n_focus": 918,
+        "n_baseline": 1188
+      },
+      {
+        "week": "2026-03-16 00:00:00-04:00",
+        "gap": -0.12286492997561804,
+        "se": 0.018876795916557637,
+        "n_focus": 881,
+        "n_baseline": 1209
+      },
+      {
+        "week": "2026-03-23 00:00:00-04:00",
+        "gap": -0.1090038314176246,
+        "se": 0.01904829025993255,
+        "n_focus": 936,
+        "n_baseline": 1160
+      },
+      {
+        "week": "2026-03-30 00:00:00-04:00",
+        "gap": -0.14711463027494487,
+        "se": 0.018977605994807616,
+        "n_focus": 929,
+        "n_baseline": 1180
+      },
+      {
+        "week": "2026-04-06 00:00:00-04:00",
+        "gap": -0.15183863055649938,
+        "se": 0.01925695165421662,
+        "n_focus": 899,
+        "n_baseline": 1195
+      },
+      {
+        "week": "2026-04-13 00:00:00-04:00",
+        "gap": -0.13063489715819876,
+        "se": 0.019064312464490637,
+        "n_focus": 887,
+        "n_baseline": 1151
+      },
+      {
+        "week": "2026-04-20 00:00:00-04:00",
+        "gap": -0.11395993179880648,
+        "se": 0.018343792881973502,
+        "n_focus": 920,
+        "n_baseline": 1173
+      },
+      {
+        "week": "2026-04-27 00:00:00-04:00",
+        "gap": -0.14719581551745609,
+        "se": 0.024458403087139178,
+        "n_focus": 545,
+        "n_baseline": 663
+      }
+    ],
+    "trend": {
+      "slope_per_week": -0.0017229371214558253,
+      "se_per_week": 0.0009078163290653657,
+      "z": -1.8978917500081323,
+      "significant": false,
+      "total_drift_over_window": -0.02928993106474903
+    },
+    "verdict": "no significant cohort trend (slope -0.17 pp/week, z=-1.9); the gap is a standing quality difference, not a live regression"
+  },
+  "dirty_vs_clean": {
+    "metric": "d1_exact",
+    "clean": {
+      "platform_rates": {
+        "android": 0.4182,
+        "ios": 0.4167,
+        "web": 0.4158
+      },
+      "focus_vs_rest": {
+        "diff": -0.00038040978671505243,
+        "se": 0.004144009106911366,
+        "ci_low": -0.008502667636261329,
+        "ci_high": 0.007741848062831224,
+        "significant": false
+      }
+    },
+    "uncleaned": {
+      "platform_rates": {
+        "android": 0.4182,
+        "ios": 0.3697,
+        "web": 0.4158
+      },
+      "focus_vs_rest": {
+        "diff": -0.047402216368019945,
+        "se": 0.004090716545570765,
+        "ci_low": -0.05542002079733865,
+        "ci_high": -0.03938441193870124,
+        "significant": true
+      }
+    },
+    "manufactured_effect": -0.04702180658130489,
+    "verdict": "on d1_exact, the uncleaned warehouse reports a -4.7 point ios effect (significant) where the cleaned one reports -0.0. The -4.7 point difference is the timezone bug, not the platform. Segmentation on unvalidated data produces confident findings, not noisy ones."
+  },
+  "dirty_vs_clean_robust_metric": {
+    "metric": "d7_plus",
+    "clean": {
+      "platform_rates": {
+        "android": 0.7736,
+        "ios": 0.7798,
+        "web": 0.7788
+      },
+      "focus_vs_rest": {
+        "diff": 0.003826269000524407,
+        "se": 0.0034911273825328514,
+        "ci_low": -0.0030163406692399813,
+        "ci_high": 0.010668878670288796,
+        "significant": false
+      }
+    },
+    "uncleaned": {
+      "platform_rates": {
+        "android": 0.7736,
+        "ios": 0.7793,
+        "web": 0.7788
+      },
+      "focus_vs_rest": {
+        "diff": 0.0033018622356771887,
+        "se": 0.003492961828760365,
+        "ci_low": -0.0035443429486931265,
+        "ci_high": 0.010148067420047504,
+        "significant": false
+      }
+    },
+    "manufactured_effect": -0.0005244067648472184,
+    "verdict": "on d7_plus, the uncleaned warehouse reports a +0.3 point ios effect (not significant) where the cleaned one reports +0.4. The -0.1 point difference is the timezone bug, not the platform. Segmentation on unvalidated data produces confident findings, not noisy ones."
+  }
+}

@@ -1,0 +1,160 @@
+{
+  "pure_selection_world": {
+    "config": {
+      "tau_log_odds": 0.0,
+      "n_users": 60000
+    },
+    "ground_truth": {
+      "risk_difference": 0.0,
+      "risk_ratio": 1.0,
+      "tau_log_odds": 0.0
+    },
+    "estimates": [
+      {
+        "method": "raw difference",
+        "risk_difference": -0.18421993963002659,
+        "risk_ratio": 0.7540163350492352,
+        "se": 0.0038035832124254983,
+        "n_paid": 29919,
+        "n_other": 30081
+      },
+      {
+        "method": "regression adjustment (g-computation)",
+        "risk_difference": -0.12036822004814574,
+        "risk_ratio": 0.8327584851910426,
+        "coefficient_log_odds": -0.5701456248945079
+      },
+      {
+        "method": "inverse-propensity weighting",
+        "risk_difference": -0.12087564553562402,
+        "risk_ratio": 0.8321038526298751,
+        "trimmed_fraction": 0.0,
+        "max_weight": 11.232499705871666,
+        "propensity_range": [
+          0.06879133995998161,
+          0.9424138671794134
+        ]
+      }
+    ],
+    "residual_bias_after_adjustment": -0.12036822004814574,
+    "selection_share_of_raw_gap": 1.0,
+    "e_value_for_adjusted_estimate": 1.6919091811154463,
+    "measured_confounders": {
+      "per_proxy": [
+        {
+          "proxy": "x0",
+          "rr_with_retention": 1.2839348821041654,
+          "rr_with_channel": 1.5080895297174952
+        },
+        {
+          "proxy": "x1",
+          "rr_with_retention": 1.2136560166208097,
+          "rr_with_channel": 1.3595425867507887
+        },
+        {
+          "proxy": "x2",
+          "rr_with_retention": 1.1585085413929042,
+          "rr_with_channel": 1.2524279153805618
+        }
+      ],
+      "strongest_single_proxy_rr": 1.2839348821041654,
+      "bundled_measured_rr": 1.6514821865651346,
+      "note": "the bundled figure is the one to compare an E-value against; the single-proxy figure is included because it is the comparison people reach for and it is too weak by construction"
+    },
+    "e_value_over_bundled_benchmark": 1.0244792192608474,
+    "reading": "an unmeasured confounder would need RR>=1.69 with both channel and retention to explain the adjusted estimate away. Everything measured here, bundled, reaches 1.65 -- a margin of 1.02x."
+  },
+  "real_effect_world": {
+    "config": {
+      "tau_log_odds": -0.55,
+      "n_users": 60000
+    },
+    "ground_truth": {
+      "risk_difference": -0.10716882567956942,
+      "risk_ratio": 0.8371783929437436,
+      "tau_log_odds": -0.55
+    },
+    "estimates": [
+      {
+        "method": "raw difference",
+        "risk_difference": -0.2981943371700513,
+        "risk_ratio": 0.6018295518282887,
+        "se": 0.003811291383192894,
+        "n_paid": 29919,
+        "n_other": 30081
+      },
+      {
+        "method": "regression adjustment (g-computation)",
+        "risk_difference": -0.2329555192645157,
+        "risk_ratio": 0.6763124048274132,
+        "coefficient_log_odds": -1.0534364456399183
+      },
+      {
+        "method": "inverse-propensity weighting",
+        "risk_difference": -0.23382868777745353,
+        "risk_ratio": 0.6752121930891694,
+        "trimmed_fraction": 0.0,
+        "max_weight": 11.232499705871666,
+        "propensity_range": [
+          0.06879133995998161,
+          0.9424138671794134
+        ]
+      }
+    ],
+    "residual_bias_after_adjustment": -0.12578669358494626,
+    "selection_share_of_raw_gap": 0.6406074417890295,
+    "e_value_for_adjusted_estimate": 2.3198384086723083,
+    "measured_confounders": {
+      "per_proxy": [
+        {
+          "proxy": "x0",
+          "rr_with_retention": 1.371460555775056,
+          "rr_with_channel": 1.5080895297174952
+        },
+        {
+          "proxy": "x1",
+          "rr_with_retention": 1.2764222503160556,
+          "rr_with_channel": 1.3595425867507887
+        },
+        {
+          "proxy": "x2",
+          "rr_with_retention": 1.199132877381534,
+          "rr_with_channel": 1.2524279153805618
+        }
+      ],
+      "strongest_single_proxy_rr": 1.371460555775056,
+      "bundled_measured_rr": 1.8898785425101214,
+      "note": "the bundled figure is the one to compare an E-value against; the single-proxy figure is included because it is the comparison people reach for and it is too weak by construction"
+    },
+    "e_value_over_bundled_benchmark": 1.2275066129864185,
+    "reading": "an unmeasured confounder would need RR>=2.32 with both channel and retention to explain the adjusted estimate away. Everything measured here, bundled, reaches 1.89 -- a margin of 1.23x."
+  },
+  "comparison": {
+    "true_rd": [
+      0.0,
+      -0.10716882567956942
+    ],
+    "raw_rd": [
+      -0.18421993963002659,
+      -0.2981943371700513
+    ],
+    "adjusted_rd": [
+      -0.12036822004814574,
+      -0.2329555192645157
+    ],
+    "e_value": [
+      1.6919091811154463,
+      2.3198384086723083
+    ],
+    "bundled_benchmark": [
+      1.6514821865651346,
+      1.8898785425101214
+    ],
+    "margin": [
+      1.0244792192608474,
+      1.2275066129864185
+    ]
+  },
+  "negative_result": "the E-value clears its benchmark in BOTH worlds, including the one where the true causal effect is exactly zero. A threshold rule on it would call pure selection causal. Only the margin differs (1.02x vs 1.23x), and a margin with no sampling distribution is not a decision rule.",
+  "implication": "run the geo holdout. Sensitivity analysis bounds how wrong an observational claim could be; it does not turn one into a causal claim."
+}

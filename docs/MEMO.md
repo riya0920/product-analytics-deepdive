@@ -140,6 +140,35 @@ correct next move is an **A/B test on the add-to-cart step**, powered against th
 49.9% baseline. At ~18,500 users per arm, that test can detect roughly a **+3%
 relative** change at 80% power — comfortably inside the range worth shipping for.
 
+## On the paid-search gap, and what it would cost to settle
+
+The 12-point paid-search retention gap survives conditioning on platform (it is
+present and significant inside all three), so it is not a mix artifact. It is
+still **not** evidence that paid search causes worse retention.
+
+We checked how far a sensitivity analysis can take that question, by running the
+same machinery in a simulated world where the true causal effect is known to be
+exactly zero. Adjusting for every observable proxy still leaves a 12-point
+"effect", and the standard sensitivity statistic (an E-value) clears its benchmark
+in that world too. In other words: **the observational apparatus cannot tell a
+pure-selection gap from a real one here**, and a threshold rule on it would call
+selection causal.
+
+So the decision-relevant question needs an experiment, and the experiment is a
+**geo holdout** — pause paid search in a randomised set of geos. Its cost is not
+in users, it is in geos:
+
+* 60 geos at 900 users/week is 54,000 users a week, and that number does not
+  enter the power calculation. The effective sample size is 60.
+* With 60 geos the study can detect a **3.3 point** change in retention. Detecting
+  the 2.0 point difference that would change the budget needs **159 geos**, or
+  pre-period adjustment correlating at **ρ ≥ 0.79** with the test window.
+
+**Recommendation: do not reallocate paid-search budget on the strength of the
+retention gap.** Either expand the geo footprint to ~160 before running the
+holdout, or accept a 3.3-point MDE and treat a null as uninformative rather than
+as evidence of no effect.
+
 ---
 
 *Data is simulated. Dollar magnitudes are meaningful only relative to other

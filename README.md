@@ -4,10 +4,13 @@ One stated business question, answered end-to-end in SQL over a DuckDB
 warehouse, with data-quality tests that are proven to catch planted defects and a
 decision memo that leads with the recommendation.
 
-> **Status: ~100% of the spec's requirements built.** The warehouse, the staging/marts models, **a real dbt
-> project with 34 passing tests, docs and lineage**, the committed figures, the
-> analysis, the memo, and a **measured query-performance study** are all done and
-> runnable. BigQuery and incrementality are not — see [Roadmap](#roadmap).
+> **Status: ~100% of the spec built.** The warehouse, the staging/marts models, **a
+> real dbt project with 34 passing tests, docs and lineage**, the committed
+> figures, the analysis, the memo, a **measured query-performance study**,
+> **segmentation with thin-cell and Simpson discipline**, and an **incrementality
+> study whose sensitivity analysis is validated and found wanting** are all done
+> and runnable. A BigQuery variant is the one thing this environment cannot host —
+> see [Roadmap](#roadmap).
 
 ## The question
 
@@ -31,6 +34,9 @@ make build       # raw -> staging -> marts in DuckDB
 make test        # SQL assertions + pytest
 make analysis    # the numbers the memo quotes
 make prove       # build WITHOUT cleaning; the tests must fail
+make segments    # channel x platform x cohort, with the discipline that makes it safe
+make incrementality  # can the causal question be answered? (no) and what would
+make geo-design      # ...price the experiment that could
 ```
 
 ## dbt, for real
@@ -129,6 +135,119 @@ reported as what it is: evidence about DuckDB, not about every engine.
 `duckdb_tables().estimated_size`, which is a **row-count estimate, not bytes**.
 It reported all three layouts as identically sized — a number that looks like a
 measurement and is not. Replaced with real parquet bytes on disk.
+
+## Segmentation, and the discipline that makes it safe
+
+`make segments`. Cutting 60,000 users by channel x platform x cohort-week produces
+hundreds of cells, and two things then go wrong silently: **multiplicity** (one
+cell in twenty looks significant with nothing going on) and **thin cells** (a
+40-user cell has a retention interval fifteen points wide and is not evidence of
+anything). Every cell here carries a Wilson interval, cells under 300 users are
+excluded, and the exclusion count is printed so it is visible rather than quiet.
+
+**Does the paid-search gap survive conditioning on platform?** Yes — and that
+matters, because a gap that only appeared in aggregate would be a platform-mix
+effect wearing a hat:
+
+| platform | paid_search D7+ | organic D7+ | gap | 95% CI |
+|---|---|---|---|---|
+| all | | | −12.1 pp | [−13.0, −11.2] |
+| android | 0.695 | 0.824 | −12.9 pp | [−14.4, −11.4] |
+| ios | 0.712 | 0.825 | −11.3 pp | [−12.7, −9.9] |
+| web | 0.704 | 0.826 | −12.2 pp | [−13.9, −10.5] |
+
+Ten channel pairs were checked for a **Simpson reversal**; none found. Reported
+even though it is a null, because a paradox check that only ever appears when it
+fires is one nobody can calibrate.
+
+### A trend that was not there
+
+The first version of the cohort-over-cohort check fitted an **unweighted** slope
+and compared its total drift to a fixed two-point threshold. It reported a
+widening gap: −0.18 pp/week, −2.9 points over the window. The generator plants no
+cohort trend at all. Fitting the slope by **weighted** least squares and testing
+it against its own standard error gives z = −1.9 — not significant, and the
+verdict flips to "standing quality difference, not a live regression". A magic
+threshold on an unweighted slope is precisely the machinery that turns noise into
+a roadmap item.
+
+### What segmentation does to unvalidated data
+
+This is the part worth the module. The generator plants an iOS timezone bug —
+events stamped in local time rather than UTC. Run the platform cut on both
+warehouses:
+
+| metric | clean iOS vs rest | uncleaned iOS vs rest | manufactured |
+|---|---|---|---|
+| `d1_exact` | −0.0 pp (ns) | **−4.7 pp (significant)** | −4.7 pp |
+| `d7_plus` | +0.4 pp (ns) | +0.3 pp (ns) | −0.1 pp |
+
+An eight-hour shift moves events across an exact-day boundary and invents a
+multi-point platform deficit; on an unbounded metric a whole tail of later
+activity absorbs it and the same bug is invisible. **Both numbers are correct.
+Only one of them is a finding, and nothing in the segmented output says which.**
+Segmentation on unvalidated data does not add noise — it adds confident, wrong
+findings.
+
+## Incrementality: the question this data cannot answer, priced
+
+`make incrementality`. The memo says paid search *retains* worse; it does not say
+paid search *causes* worse retention. The observed gap is
+
+    observed gap  =  causal effect of the channel  +  selection
+
+and no amount of SQL over this table separates the terms, because the confounder
+is user intent and nobody logs intent. So the module simulates the situation with
+a **known** causal effect, runs what an analyst would actually run — raw
+difference, g-computation, inverse-propensity weighting — and then does the thing
+that is usually skipped: **validates the sensitivity analysis in a world where the
+answer is known.**
+
+|  | pure selection (τ=0) | real effect (τ=−0.55) |
+|---|---|---|
+| true risk difference | 0.0 | −10.7 pp |
+| raw difference | −18.4 pp | −29.8 pp |
+| adjusted (g-computation) | **−12.0 pp** | −23.3 pp |
+| E-value | 1.69 | 2.32 |
+| strength of everything measured, bundled | 1.65 | 1.89 |
+| margin | **1.02x** | 1.23x |
+
+### The negative result
+
+The plan was that the E-value would separate the two worlds. **It does not.** In
+the world where the true causal effect is *exactly zero*, adjustment still leaves
+−12.0 points, and the E-value for that residual clears its benchmark. A rule of
+"the E-value beats what we measured, therefore causal" calls pure selection
+causal. Only the margin differs, and a margin with no sampling distribution is not
+something to set a budget by.
+
+Two smaller things fell out of building it:
+
+* **The benchmark choice decides the answer.** The obvious comparison — the
+  strongest single measured covariate — is too weak by construction, because a
+  latent confounder is generally stronger than any individual noisy measurement of
+  it. Bundling the measured covariates into fitted indices and comparing top
+  quartile to bottom raises the benchmark from 1.28 to 1.65 and is the defensible
+  version. Both are reported.
+* **Adjustment removes about the same absolute bias in both worlds** (−0.12 in
+  each), which is exactly why the adjusted point estimates cannot be told apart.
+
+### So price the experiment instead
+
+`make geo-design`. The unit of randomisation is a **geo**, because you cannot
+switch ads off for one user, and that single fact costs almost all the power:
+
+* 60 geos x 900 users/week = **54,000 users a week**, and that number is
+  irrelevant. The effective sample size is **60**.
+* Between-geo retention SD is ~4.5 points, which dominates the binomial noise
+  inside a geo and sets the MDE.
+* At 60 geos the study detects a **3.3 point** change. The 2.0 point target needs
+  **159 geos** — or pre-period adjustment at **ρ ≥ 0.79**, solved rather than read
+  off a table of round numbers, and itself an assumption to check.
+
+And what it still cannot do: a holdout measures the effect of **turning paid
+search off**, which is the decision-relevant quantity, not the effect of a
+paid-search user being a paid-search user. Organic pickup means those differ.
 
 ## The pipeline
 
@@ -236,16 +355,32 @@ in particular would have made the memo size a fake problem.
 | Referential integrity test (sessions -> users) | done |
 | Committed figures generated from the warehouse | done |
 | Query-performance study: three layouts, timings and real bytes | done |
-| **BigQuery variant (bytes-scanned is the cost model there)** | not started |
-| **Segmentation beyond channel (platform, geo, cohort-over-cohort)** | not started |
-| **Incrementality: is paid search causing the gap or selecting it?** | not started |
+| Segmentation: channel x platform x cohort, Wilson intervals, thin-cell exclusion | done |
+| Simpson-reversal check, reported even when null | done |
+| Timezone bug shown to manufacture a platform effect on a fragile metric | done |
+| Incrementality: g-computation, IPW, E-value, validated against known truth | done |
+| Geo-holdout design priced, including the pre-period correlation it needs | done |
+| **BigQuery variant (bytes-scanned is the cost model there)** | not possible here: no BigQuery |
+| **Geographic segmentation** | not started: the generator has no geo dimension |
+| **Actually running the geo holdout** | not possible here: it needs a live ad account |
 
-That last row is the most important limitation. The memo reports that paid search
-retains worse; it does **not** claim paid search *causes* worse retention. That
-is a selection-vs-treatment question this data cannot settle.
+The memo still reports that paid search *retains* worse and still does **not**
+claim paid search *causes* worse retention. What changed is that the size of the
+gap between those two statements is now measured, and the experiment that would
+close it is costed.
 
 ## Honesty notes
 
+* **The incrementality module's world is not this warehouse.** It is a separate
+  simulation with a known `tau`, because the warehouse's channel effect is baked
+  in as a user property and therefore has no causal contrast to recover. What
+  transfers is the method and the negative result, not the numbers.
+* **The E-value validation is a single pair of worlds**, not a coverage study
+  across a grid of confounding strengths. It is enough to show the decision rule
+  fails; it is not enough to characterise *when*.
+* **`geo_holdout_design` takes the between-geo SD as an input.** There are no geos
+  in this dataset to measure it from, so 4.5 points is an assumption stated as an
+  argument, not a measurement. Every number downstream of it moves if it is wrong.
 * Data is **simulated**. Dollar magnitudes are meaningful only relative to other
   figures in this dataset and are not real-world claims.
 * The memo's dollar figures are **upper bounds** and say so, with the largest
