@@ -11,6 +11,10 @@ SELECT
     CAST(MIN(event_ts) AS DATE) AS signup_date,
     DATE_TRUNC('week', MIN(event_ts)) AS signup_week,
     FIRST(channel ORDER BY event_ts) AS channel,
-    FIRST(platform ORDER BY event_ts) AS platform
+    FIRST(platform ORDER BY event_ts) AS platform,
+    -- Region is fixed at signup for the same reason channel is: taking the
+    -- latest value would move users between regions whenever someone travels,
+    -- and historical regional cohorts would change every time you re-run.
+    FIRST(region ORDER BY event_ts) AS region
 FROM stg_events
 GROUP BY user_id

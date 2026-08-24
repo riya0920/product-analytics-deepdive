@@ -35,6 +35,24 @@ FUNNEL = ["signup", "activate", "first_search", "add_to_cart", "purchase"]
 # TRUE step-through rates. The analysis has to recover these from the events.
 TRUE_STEP_RATES = {"activate": 0.72, "first_search": 0.81, "add_to_cart": 0.46, "purchase": 0.58}
 
+# Regions, and the reason they exist here. A region has NO direct effect on any
+# outcome in this generator -- not on funnel step-through, not on retention. What
+# it has is a different CHANNEL MIX: emea buys more paid search, apac skews
+# organic and referral. So any regional difference in retention is entirely a
+# composition effect, and an analysis that recovers that is doing its job while
+# an analysis that reports "emea retains worse" is technically true and
+# actionably wrong.
+REGIONS = ["amer", "emea", "apac"]
+REGION_WEIGHTS = [0.46, 0.34, 0.20]
+# P(region | channel). Columns are regions in the order above.
+CHANNEL_REGION_MIX = {
+    "organic":     [0.44, 0.28, 0.28],
+    "paid_search": [0.40, 0.47, 0.13],
+    "social":      [0.50, 0.30, 0.20],
+    "referral":    [0.46, 0.28, 0.26],
+    "email":       [0.55, 0.30, 0.15],
+}
+
 CHANNELS = ["organic", "paid_search", "social", "referral", "email"]
 CHANNEL_WEIGHTS = [0.34, 0.26, 0.18, 0.12, 0.10]
 # Paid traffic converts worse and retains worse -- the segmentation cut that
@@ -81,6 +99,19 @@ def generate(cfg: GenConfig) -> pd.DataFrame:
 
     signup_day = rng.integers(0, cfg.days, size=cfg.n_users)
     channel = rng.choice(CHANNELS, size=cfg.n_users, p=CHANNEL_WEIGHTS)
+
+    # Region is drawn from a SEPARATE generator, seeded independently.
+    #
+    # This is not a stylistic choice. Drawing it from `rng` would consume values
+    # from the main stream and shift every subsequent draw, which would change
+    # the funnel rates, the retention curves and every number the committed memo
+    # and README quote -- for a column that is supposed to be additive. A side
+    # stream leaves the existing data byte-identical, and a test asserts exactly
+    # that against the pre-existing figures.
+    region_rng = np.random.default_rng(cfg.seed + 4_242)
+    region = np.array([
+        REGIONS[region_rng.choice(3, p=CHANNEL_REGION_MIX[c])] for c in channel
+    ])
     platform = rng.choice(PLATFORMS, size=cfg.n_users, p=PLATFORM_WEIGHTS)
     quality = np.array([CHANNEL_QUALITY[c] for c in channel])
     user_ids = np.array(["u_%06d" % i for i in range(cfg.n_users)])
@@ -91,7 +122,8 @@ def generate(cfg: GenConfig) -> pd.DataFrame:
     # Every user emits a signup event.
     signup_ts = base_ts + pd.to_timedelta(signup_day, unit="D") + pd.to_timedelta(time_of_day_seconds(rng, cfg.n_users), unit="s")
     rows.append(pd.DataFrame({"user_id": user_ids, "event_name": "signup", "event_ts": signup_ts,
-                              "channel": channel, "platform": platform, "revenue": 0.0}))
+                              "channel": channel, "platform": platform, "region": region,
+                              "revenue": 0.0}))
 
     alive = np.ones(cfg.n_users, dtype=bool)
     last_ts = signup_ts.copy()
@@ -106,7 +138,8 @@ def generate(cfg: GenConfig) -> pd.DataFrame:
         revenue = np.where(advanced & (step == "purchase"), rng.lognormal(3.4, 0.8, cfg.n_users), 0.0)
         rows.append(pd.DataFrame({"user_id": user_ids[advanced], "event_name": step,
                                   "event_ts": ts[advanced], "channel": channel[advanced],
-                                  "platform": platform[advanced], "revenue": revenue[advanced]}))
+                                  "platform": platform[advanced], "region": region[advanced],
+                                  "revenue": revenue[advanced]}))
         last_ts = np.where(advanced, ts, last_ts)
         last_ts = pd.to_datetime(pd.Series(last_ts), utc=True)
         alive = advanced
@@ -126,7 +159,8 @@ def generate(cfg: GenConfig) -> pd.DataFrame:
               + pd.to_timedelta(time_of_day_seconds(rng, cfg.n_users), unit="s"))
         rows.append(pd.DataFrame({"user_id": user_ids[returned], "event_name": "session_start",
                                   "event_ts": ts[returned], "channel": channel[returned],
-                                  "platform": platform[returned], "revenue": 0.0}))
+                                  "platform": platform[returned], "region": region[returned],
+                                  "revenue": 0.0}))
 
     df = pd.concat(rows, ignore_index=True)
 
@@ -150,7 +184,8 @@ def generate(cfg: GenConfig) -> pd.DataFrame:
     # 4. out-of-order arrival
     df = df.sample(frac=1.0, random_state=cfg.seed).reset_index(drop=True)
     df["event_id"] = ["e_%08d" % i for i in range(len(df))]
-    return df[["event_id", "user_id", "event_name", "event_ts", "channel", "platform", "revenue"]]
+    return df[["event_id", "user_id", "event_name", "event_ts", "channel", "platform",
+               "region", "revenue"]]
 
 
 def ground_truth(cfg: GenConfig) -> dict:
@@ -160,6 +195,8 @@ def ground_truth(cfg: GenConfig) -> dict:
         "planted_dup_rate": cfg.dup_rate,
         "planted_null_user_rate": cfg.null_user_rate,
         "planted_ios_tz_offset_hours": cfg.ios_tz_offset_hours,
+        "region_has_no_direct_effect": True,
+        "channel_region_mix": CHANNEL_REGION_MIX,
         "n_users": cfg.n_users,
     }
 

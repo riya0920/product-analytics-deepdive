@@ -189,6 +189,63 @@ Only one of them is a finding, and nothing in the segmented output says which.**
 Segmentation on unvalidated data does not add noise — it adds confident, wrong
 findings.
 
+### Geography, and the decomposition that stops it becoming a bad recommendation
+
+`make segments` now cuts by region too, and the regional number on its own is a
+trap:
+
+| region | n | D7+ | 95% CI |
+|---|---|---|---|
+| apac | 12,514 | 0.7862 | [0.779, 0.793] |
+| amer | 27,373 | 0.7812 | [0.776, 0.786] |
+| **emea** | 20,111 | **0.7667** | [0.761, 0.773] |
+
+EMEA retains **1.9 points worse** than APAC, and the confidence intervals do not
+overlap. Reported there, it reads as a product problem in EMEA.
+
+It is not. A regional gap has two explanations with *opposite* responses —
+a different channel mix (a marketing fact) or a worse experience within the same
+channel (a product fact) — and the headline number cannot tell them apart.
+**Kitagawa decomposition** (Oaxaca–Blinder for rates) separates them:
+
+    gap = Σ_c (w_A,c − w_B,c) · r̄_c        ← composition
+        + Σ_c  w̄_c · (r_A,c − r_B,c)       ← rate
+
+| component | points | |
+|---|---|---|
+| channel mix (composition) | **−2.44** | |
+| within-channel (rate) | +0.49 ± 0.51 | **not significant** |
+| residual from thin cells | +0.00 | |
+
+Composition accounts for *more than the whole gap*; the within-channel term runs
+the other way by half a point and is indistinguishable from zero. **Within the
+same channel, EMEA and APAC are the same.** EMEA buys more paid search, and paid
+search retains worse everywhere — which the memo already knew. A product
+investigation into EMEA would be chasing a marketing fact.
+
+The symmetric form is used deliberately: weighting composition by one region's
+rates and rates by the other's weights gives a different answer depending on
+which region you call the baseline, and there is no principled reason to prefer
+either direction. A test asserts that reversing the pair just flips the signs.
+
+**The generator plants no direct regional effect at all** — only a different
+channel mix per region. So a correct decomposition *must* return a
+non-significant rate term, and a test asserts exactly that. If the analysis ever
+starts finding a regional effect, it has found a bug in itself.
+
+### Adding a column without moving a single existing number
+
+Region is drawn from a **separate RNG stream**, seeded independently of the main
+generator. That is not a stylistic choice: drawing it from the main stream would
+consume values and shift every subsequent draw, silently changing the funnel
+rates, the retention curves, and every figure the committed memo quotes — for a
+column that is supposed to be purely additive.
+
+The funnel after adding region is byte-identical to the funnel before it
+(59,771 signups, 0.7316 activation, 0.4987 add-to-cart, 11,877 purchases), and a
+test pins those exact values against the pre-existing figures rather than
+trusting the argument.
+
 ## Incrementality: the question this data cannot answer, priced
 
 `make incrementality`. The memo says paid search *retains* worse; it does not say
@@ -361,7 +418,7 @@ in particular would have made the memo size a fake problem.
 | Incrementality: g-computation, IPW, E-value, validated against known truth | done |
 | Geo-holdout design priced, including the pre-period correlation it needs | done |
 | **BigQuery variant (bytes-scanned is the cost model there)** | not possible here: no BigQuery |
-| **Geographic segmentation** | not started: the generator has no geo dimension |
+| Geographic segmentation with a Kitagawa composition/rate decomposition | done |
 | **Actually running the geo holdout** | not possible here: it needs a live ad account |
 
 The memo still reports that paid search *retains* worse and still does **not**

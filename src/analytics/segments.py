@@ -29,7 +29,11 @@ hundreds of cells. Two things go wrong at that point, and both are silent:
    reverses inside every subgroup is flagged by name.
 3. **Cohort-over-cohort.** Is the gap widening, stable, or an artifact of one
    bad week?
-4. **The same cuts on the UNCLEANED warehouse**, which is where this gets
+4. **Geography, decomposed.** A regional retention gap has two explanations with
+   opposite responses -- a different channel mix (marketing) or a worse
+   experience within the same channel (product) -- and the headline number
+   cannot tell them apart. `kitagawa_decomposition` splits it.
+5. **The same cuts on the UNCLEANED warehouse**, which is where this gets
    interesting: the planted iOS timezone bug manufactures a platform effect that
    does not exist. Segmentation on unvalidated data does not just add noise, it
    adds confident, wrong findings — and this is the demonstration.
@@ -255,6 +259,155 @@ def cohort_over_cohort(con, focus: str = "paid_search", baseline: str = "organic
                         "too few usable weeks to fit a trend")}
 
 
+# ---------------------------------------------------------------------------
+# geography, and the decomposition that stops it becoming a bad recommendation
+# ---------------------------------------------------------------------------
+
+def region_rates(con, metric: str = "d7_plus") -> dict:
+    return {c["region"]: c for c in _cells(con, ["region"], metric=metric)}
+
+
+def region_channel_cells(con, metric: str = "d7_plus") -> dict:
+    return {(c["region"], c["channel"]): c
+            for c in _cells(con, ["region", "channel"], metric=metric)}
+
+
+def kitagawa_decomposition(con, focus: str, baseline: str, metric: str = "d7_plus") -> dict:
+    """Split a regional gap into COMPOSITION and RATE components.
+
+    A region retaining worse has two completely different explanations with
+    completely different responses:
+
+      * **Composition.** The region buys a different channel mix, and the
+        channels it buys more of retain worse everywhere. Nothing about the
+        region is wrong; the acquisition portfolio is different. The response is
+        a marketing one.
+      * **Rate.** Within the same channel, users in that region retain worse.
+        Something about the product experience there is worse -- latency,
+        localisation, payment methods. The response is a product one.
+
+    Kitagawa's decomposition (Oaxaca-Blinder for rates) separates them:
+
+        gap = SUM_c (w_A,c - w_B,c) * rbar_c        <- composition
+            + SUM_c  wbar_c * (r_A,c - r_B,c)       <- rate
+
+    using the mean weight and mean rate as the reference, which is the symmetric
+    form. The asymmetric version -- weighting composition by A's rates and rates
+    by B's weights -- gives a different answer depending on which region you call
+    the baseline, and there is no principled reason to prefer either direction.
+
+    Reporting the headline gap without this split is how "EMEA retains 4 points
+    worse" becomes a product investigation into a marketing fact.
+    """
+    cells = region_channel_cells(con, metric=metric)
+    channels = sorted({ch for (_r, ch) in cells})
+
+    def weights_and_rates(region):
+        rows = [(ch, cells.get((region, ch))) for ch in channels]
+        total = sum(c["n"] for _ch, c in rows if c)
+        w = {ch: (c["n"] / total if c and total else 0.0) for ch, c in rows}
+        r = {ch: (c["rate"] if c and c["n"] else float("nan")) for ch, c in rows}
+        return w, r, total
+
+    wA, rA, nA = weights_and_rates(focus)
+    wB, rB, nB = weights_and_rates(baseline)
+
+    comp = rate = 0.0
+    per_channel = []
+    for ch in channels:
+        if not (wA[ch] and wB[ch]):
+            continue
+        wbar = (wA[ch] + wB[ch]) / 2.0
+        rbar = (rA[ch] + rB[ch]) / 2.0
+        c_part = (wA[ch] - wB[ch]) * rbar
+        r_part = wbar * (rA[ch] - rB[ch])
+        comp += c_part
+        rate += r_part
+        per_channel.append({
+            "channel": ch,
+            "weight_focus": wA[ch], "weight_baseline": wB[ch],
+            "rate_focus": rA[ch], "rate_baseline": rB[ch],
+            "composition_contribution": c_part,
+            "rate_contribution": r_part,
+        })
+
+    agg = region_rates(con, metric=metric)
+    observed = agg[focus]["rate"] - agg[baseline]["rate"]
+    total = comp + rate
+    share_comp = comp / total if abs(total) > 1e-12 else float("nan")
+
+    # Standard error of the RATE component, so "consistent with zero" is a claim
+    # rather than an eyeball. Each channel contributes wbar * (rA - rB), and the
+    # channels are disjoint user sets, so the variances add.
+    var_rate = 0.0
+    for row in per_channel:
+        ch = row["channel"]
+        a, b = cells.get((focus, ch)), cells.get((baseline, ch))
+        if not (a and b and a["n"] and b["n"]):
+            continue
+        wbar = (row["weight_focus"] + row["weight_baseline"]) / 2.0
+        va = a["rate"] * (1 - a["rate"]) / a["n"]
+        vb = b["rate"] * (1 - b["rate"]) / b["n"]
+        var_rate += (wbar ** 2) * (va + vb)
+    se_rate = math.sqrt(var_rate)
+    rate_significant = abs(rate) > 1.96 * se_rate
+
+    return {
+        "metric": metric,
+        "focus": focus, "baseline": baseline,
+        "n_focus": nA, "n_baseline": nB,
+        "observed_gap": observed,
+        "decomposed_gap": total,
+        "composition": comp,
+        "rate": rate,
+        "composition_share": share_comp,
+        "per_channel": per_channel,
+        # The decomposition is exact only when every cell is populated in both
+        # regions; a dropped thin cell leaves a residual, and hiding it would let
+        # the two components silently fail to add up to the thing being explained.
+        "residual_vs_observed": observed - total,
+        "rate_component_se": se_rate,
+        "rate_component_significant": bool(rate_significant),
+        "verdict": (
+            "the %+.1f point gap is entirely CHANNEL MIX. Composition accounts for %+.1f points "
+            "-- more than the whole gap -- and the within-channel term runs the other way by "
+            "%+.1f points (SE %.1f), which is consistent with zero. Within the same channel the "
+            "two regions are indistinguishable. The finding is about the acquisition portfolio; "
+            "a product investigation into %s would be chasing a marketing fact."
+            % (100 * observed, 100 * comp, 100 * rate, 100 * se_rate, focus)
+            if not rate_significant else
+            "%.0f%% of the %+.1f point gap is channel mix, but %+.1f points (SE %.1f) survives "
+            "conditioning on channel. That residual is a genuine within-channel difference and "
+            "is a product question, not a marketing one."
+            % (100 * share_comp, 100 * observed, 100 * rate, 100 * se_rate)),
+    }
+
+
+def geography(con, metric: str = "d7_plus") -> dict:
+    """Regional retention, and every pairwise gap decomposed."""
+    agg = region_rates(con, metric=metric)
+    regions = sorted(agg)
+    worst = min(regions, key=lambda r: agg[r]["rate"])
+    best = max(regions, key=lambda r: agg[r]["rate"])
+
+    cells = region_channel_cells(con, metric=metric)
+    thin = sum(1 for c in cells.values() if c["thin"])
+
+    return {
+        "metric": metric,
+        "by_region": {r: {"n": agg[r]["n"], "rate": agg[r]["rate"],
+                          "ci": [agg[r]["ci_low"], agg[r]["ci_high"]]} for r in regions},
+        "worst": worst, "best": best,
+        "headline_gap": _gap(agg[worst], agg[best]),
+        "cells_thin": thin,
+        "decomposition": kitagawa_decomposition(con, worst, best, metric=metric),
+        "channel_mix": {
+            r: {ch: round(cells[(r, ch)]["n"] / agg[r]["n"], 4)
+                for ch in sorted({c for (_r, c) in cells}) if (r, ch) in cells}
+            for r in regions},
+    }
+
+
 def dirty_vs_clean(focus_platform: str = "ios", metric: str = "d1_exact") -> dict:
     """The point of the module: what segmentation does to unvalidated data.
 
@@ -306,6 +459,7 @@ def run_all(db: str = DB) -> dict:
         cells = _cells(con, ["channel", "platform"])
         report = {
             "min_cell_size": MIN_CELL,
+            "geography": geography(con),
             "cells_total": len(cells),
             "cells_excluded_as_thin": sum(1 for c in cells if c["thin"]),
             "gap_within_platforms": gap_within_platforms(con),
@@ -346,6 +500,27 @@ def to_markdown(rep: dict) -> str:
     if c["trend"]:
         lines.append("Gap drift over the window: %+.2f points (slope %+.4f pp/week)."
                      % (100 * c["trend"]["total_drift_over_window"], 100 * c["trend"]["slope_per_week"]))
+    g = rep.get("geography")
+    if g:
+        lines += ["", "## Geography, decomposed", "",
+                  "| region | n | %s | 95%% CI |" % g["metric"], "|---|---|---|---|"]
+        for r, v in sorted(g["by_region"].items()):
+            lines.append("| %s | %d | %.4f | [%.3f, %.3f] |"
+                         % (r, v["n"], v["rate"], v["ci"][0], v["ci"][1]))
+        d = g["decomposition"]
+        lines += ["",
+                  "Headline: **%s** retains %+.1f points against **%s**."
+                  % (d["focus"], 100 * d["observed_gap"], d["baseline"]),
+                  "",
+                  "| component | points | share |", "|---|---|---|",
+                  "| channel mix (composition) | %+.2f | %.0f%% |"
+                  % (100 * d["composition"], 100 * d["composition_share"]),
+                  "| within-channel (rate) | %+.2f +/- %.2f | %s |"
+                  % (100 * d["rate"], 100 * 1.96 * d["rate_component_se"],
+                     "significant" if d["rate_component_significant"] else "**not significant**"),
+                  "| residual from thin cells | %+.2f | |" % (100 * d["residual_vs_observed"]),
+                  "", d["verdict"], ""]
+
     lines += ["", c["verdict"], "", "## Segmentation on unvalidated data", ""]
     for key in ("dirty_vs_clean", "dirty_vs_clean_robust_metric"):
         d = rep.get(key, {})

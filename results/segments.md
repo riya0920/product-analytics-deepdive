@@ -19,6 +19,25 @@ no Simpson reversal: every aggregate channel comparison keeps its sign inside ev
 18 weeks reported, 0 excluded as thin.
 Gap drift over the window: -2.93 points (slope -0.1723 pp/week).
 
+## Geography, decomposed
+
+| region | n | d7_plus | 95% CI |
+|---|---|---|---|
+| amer | 27373 | 0.7812 | [0.776, 0.786] |
+| apac | 12514 | 0.7862 | [0.779, 0.793] |
+| emea | 20111 | 0.7667 | [0.761, 0.773] |
+
+Headline: **emea** retains -1.9 points against **apac**.
+
+| component | points | share |
+|---|---|---|
+| channel mix (composition) | -2.44 | 125% |
+| within-channel (rate) | +0.49 +/- 0.96 | **not significant** |
+| residual from thin cells | +0.00 | |
+
+the -1.9 point gap is entirely CHANNEL MIX. Composition accounts for -2.4 points -- more than the whole gap -- and the within-channel term runs the other way by +0.5 points (SE 0.5), which is consistent with zero. Within the same channel the two regions are indistinguishable. The finding is about the acquisition portfolio; a product investigation into emea would be chasing a marketing fact.
+
+
 no significant cohort trend (slope -0.17 pp/week, z=-1.9); the gap is a standing quality difference, not a live regression
 
 ## Segmentation on unvalidated data

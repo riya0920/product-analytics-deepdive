@@ -38,7 +38,7 @@ MODELS = [
 # straight through, defects intact.
 PASSTHROUGH_STG_EVENTS = """
 SELECT event_id, user_id, event_name, event_ts, CAST(event_ts AS DATE) AS event_date,
-       channel, platform, revenue
+       channel, platform, region, revenue
 FROM raw_events
 """
 

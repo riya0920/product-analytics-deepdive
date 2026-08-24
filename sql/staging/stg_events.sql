@@ -26,6 +26,8 @@ WITH raw AS (
         END AS event_ts,
         channel,
         platform,
+    region,
+        region,
         revenue
     FROM raw_events
     WHERE user_id IS NOT NULL          -- consent-blocked clients; counted in audit_data_quality
@@ -49,6 +51,7 @@ SELECT
     CAST(event_ts AS DATE) AS event_date,
     channel,
     platform,
+    region,
     revenue
 FROM deduplicated
 WHERE occurrence = 1

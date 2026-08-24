@@ -1,5 +1,130 @@
 {
   "min_cell_size": 300,
+  "geography": {
+    "metric": "d7_plus",
+    "by_region": {
+      "amer": {
+        "n": 27373,
+        "rate": 0.781244291820407,
+        "ci": [
+          0.7763076755104961,
+          0.786101980956216
+        ]
+      },
+      "apac": {
+        "n": 12514,
+        "rate": 0.7862394118587183,
+        "ci": [
+          0.7789693780345346,
+          0.7933337641298726
+        ]
+      },
+      "emea": {
+        "n": 20111,
+        "rate": 0.766744567649545,
+        "ci": [
+          0.7608491236442143,
+          0.7725381278518293
+        ]
+      }
+    },
+    "worst": "emea",
+    "best": "apac",
+    "headline_gap": {
+      "diff": -0.019494844209173245,
+      "se": 0.004724756982593652,
+      "ci_low": -0.028755367895056803,
+      "ci_high": -0.010234320523289687,
+      "significant": true
+    },
+    "cells_thin": 0,
+    "decomposition": {
+      "metric": "d7_plus",
+      "focus": "emea",
+      "baseline": "apac",
+      "n_focus": 20111,
+      "n_baseline": 12514,
+      "observed_gap": -0.019494844209173245,
+      "decomposed_gap": -0.019494844209173245,
+      "composition": -0.024352523324338536,
+      "rate": 0.0048576791151652915,
+      "composition_share": 1.249177631944323,
+      "per_channel": [
+        {
+          "channel": "email",
+          "weight_focus": 0.08781263984883894,
+          "weight_baseline": 0.07455649672366949,
+          "rate_focus": 0.7927519818799547,
+          "rate_baseline": 0.812433011789925,
+          "composition_contribution": 0.010639281009231076,
+          "rate_contribution": -0.0015977959166697986
+        },
+        {
+          "channel": "organic",
+          "weight_focus": 0.28785241907413855,
+          "weight_baseline": 0.4383090938149273,
+          "rate_focus": 0.822594575919848,
+          "rate_baseline": 0.8222424794895169,
+          "composition_contribution": -0.12373835692366175,
+          "rate_contribution": 0.00012783943826602558
+        },
+        {
+          "channel": "paid_search",
+          "weight_focus": 0.36348267117497884,
+          "weight_baseline": 0.16381652549144957,
+          "rate_focus": 0.7099863201094391,
+          "rate_baseline": 0.6912195121951219,
+          "composition_contribution": 0.13988668392276668,
+          "rate_contribution": 0.004947861368606308
+        },
+        {
+          "channel": "referral",
+          "weight_focus": 0.09850330664810303,
+          "weight_baseline": 0.1468754994406265,
+          "rate_focus": 0.8450277637556789,
+          "rate_baseline": 0.8443960826985855,
+          "composition_contribution": -0.04086056800448613,
+          "rate_contribution": 7.750057180922698e-05
+        },
+        {
+          "channel": "social",
+          "weight_focus": 0.16234896325394063,
+          "weight_baseline": 0.17644238452932715,
+          "rate_focus": 0.7332312404287902,
+          "rate_baseline": 0.7255434782608695,
+          "composition_contribution": -0.010279563328188414,
+          "rate_contribution": 0.0013022736531535294
+        }
+      ],
+      "residual_vs_observed": 0.0,
+      "rate_component_se": 0.004909059978139599,
+      "rate_component_significant": false,
+      "verdict": "the -1.9 point gap is entirely CHANNEL MIX. Composition accounts for -2.4 points -- more than the whole gap -- and the within-channel term runs the other way by +0.5 points (SE 0.5), which is consistent with zero. Within the same channel the two regions are indistinguishable. The finding is about the acquisition portfolio; a product investigation into emea would be chasing a marketing fact."
+    },
+    "channel_mix": {
+      "amer": {
+        "email": 0.1234,
+        "organic": 0.3277,
+        "paid_search": 0.2316,
+        "referral": 0.1175,
+        "social": 0.1998
+      },
+      "apac": {
+        "email": 0.0746,
+        "organic": 0.4383,
+        "paid_search": 0.1638,
+        "referral": 0.1469,
+        "social": 0.1764
+      },
+      "emea": {
+        "email": 0.0878,
+        "organic": 0.2879,
+        "paid_search": 0.3635,
+        "referral": 0.0985,
+        "social": 0.1623
+      }
+    }
+  },
   "cells_total": 15,
   "cells_excluded_as_thin": 0,
   "gap_within_platforms": {

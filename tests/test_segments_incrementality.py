@@ -211,3 +211,70 @@ def test_the_solved_rho_actually_makes_the_study_feasible():
     z = 1.959963985 + 0.8416212336
     needed = math.ceil(((z * d["between_geo_sd"] * math.sqrt(1 - rho ** 2)) / d["target_lift"]) ** 2 * 4)
     assert needed <= d["n_geos_available"] + 1
+
+
+# --- geography -------------------------------------------------------------
+
+def test_adding_region_did_not_disturb_any_existing_number(con):
+    """The reason region is drawn from a SEPARATE rng stream.
+
+    Drawing it from the main generator would consume values and shift every
+    subsequent draw, silently changing the funnel rates, the retention curves and
+    every figure the committed memo quotes -- for a column that is supposed to be
+    purely additive. These are the values from before the column existed.
+    """
+    rows = con.execute(
+        "SELECT step, users_reached, ROUND(step_conversion, 4) FROM mart_funnel "
+        "ORDER BY step_index").fetchall()
+    assert rows == [("signup", 59771, None), ("activate", 43731, 0.7316),
+                    ("first_search", 37232, 0.8514), ("add_to_cart", 18568, 0.4987),
+                    ("purchase", 11877, 0.6396)]
+    assert con.execute("SELECT COUNT(*) FROM stg_users").fetchone()[0] == 59998
+    assert con.execute("SELECT COUNT(*) FROM stg_events").fetchone()[0] == 373691
+
+
+def test_every_user_has_a_region(con):
+    assert con.execute("SELECT COUNT(*) FROM stg_users WHERE region IS NULL").fetchone()[0] == 0
+
+
+def test_regions_differ_in_channel_mix(con):
+    """The planted structure. Without it there is nothing for the decomposition
+    to find and the whole section is vacuous."""
+    g = seg.geography(con)
+    mixes = g["channel_mix"]
+    paid = {r: m["paid_search"] for r, m in mixes.items()}
+    assert max(paid.values()) - min(paid.values()) > 0.05
+
+
+def test_the_regional_gap_is_entirely_composition(con):
+    """The generator gives region NO direct effect on anything, so a correct
+    decomposition must attribute the observed gap to channel mix and leave a
+    within-channel term indistinguishable from zero. An analysis that reports the
+    headline gap as a regional finding is technically true and actionably wrong.
+    """
+    d = seg.geography(con)["decomposition"]
+    assert abs(d["observed_gap"]) > 0.01, "no gap to decompose"
+    assert not d["rate_component_significant"], (
+        "a within-channel regional effect appeared, and the generator plants none: %r" % d["rate"])
+    assert abs(d["composition"]) > abs(d["rate"])
+
+
+def test_the_decomposition_adds_up(con):
+    """Composition plus rate must reconstruct the observed gap. A dropped thin
+    cell leaves a residual, and hiding it would let the two components silently
+    fail to explain the thing they are decomposing."""
+    d = seg.geography(con)["decomposition"]
+    assert abs(d["residual_vs_observed"]) < 0.005
+    assert d["composition"] + d["rate"] == pytest.approx(d["decomposed_gap"])
+
+
+def test_the_decomposition_is_symmetric_in_its_reference(con):
+    """The asymmetric Oaxaca form -- weighting composition by one region's rates
+    and rates by the other's weights -- gives a different answer depending on
+    which region is called the baseline, and there is no principled reason to
+    prefer either direction. Reversing the pair must just flip the signs."""
+    g = seg.geography(con)
+    a = seg.kitagawa_decomposition(con, g["worst"], g["best"])
+    b = seg.kitagawa_decomposition(con, g["best"], g["worst"])
+    assert a["composition"] == pytest.approx(-b["composition"], abs=1e-9)
+    assert a["rate"] == pytest.approx(-b["rate"], abs=1e-9)
