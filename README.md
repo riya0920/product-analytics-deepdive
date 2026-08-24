@@ -397,7 +397,7 @@ no mix to drift, and the generator's rate comes back exactly.
 Both are in the git history rather than quietly corrected, because the second one
 in particular would have made the memo size a fake problem.
 
-## Roadmap (the remaining ~60%)
+## Roadmap
 
 | Milestone | Status |
 |---|---|
