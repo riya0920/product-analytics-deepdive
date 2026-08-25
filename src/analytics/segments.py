@@ -1,4 +1,4 @@
-"""Segmentation beyond channel — and the discipline that makes it safe.
+"""Segmentation beyond channel - and the discipline that makes it safe.
 
     python -m analytics.segments
 
@@ -36,7 +36,7 @@ hundreds of cells. Two things go wrong at that point, and both are silent:
 5. **The same cuts on the UNCLEANED warehouse**, which is where this gets
    interesting: the planted iOS timezone bug manufactures a platform effect that
    does not exist. Segmentation on unvalidated data does not just add noise, it
-   adds confident, wrong findings — and this is the demonstration.
+   adds confident, wrong findings - and this is the demonstration.
 """
 from __future__ import annotations
 

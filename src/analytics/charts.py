@@ -70,7 +70,7 @@ def funnel_chart(con, path: str):
                     color="white", fontweight="bold")
 
     ax.set_ylabel("users reaching step")
-    ax.set_title("Onboarding funnel — %s loses the most users (%.0f%% pass rate)"
+    ax.set_title("Onboarding funnel - %s loses the most users (%.0f%% pass rate)"
                  % (steps[worst], 100 * convs[worst]), fontsize=11)
     _style(ax)
     ax.set_ylim(0, max(users) * 1.15)
@@ -115,7 +115,7 @@ def retention_chart(con, path: str):
                 label=channel)
     ax.set_xlabel("days since signup")
     ax.set_ylabel("fraction of cohort active")
-    ax.set_title("Retention by acquisition channel — paid search trails throughout", fontsize=11)
+    ax.set_title("Retention by acquisition channel - paid search trails throughout", fontsize=11)
     ax.legend(frameon=False, fontsize=9, ncol=5, loc="upper right")
     _style(ax)
     plt.tight_layout()

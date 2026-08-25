@@ -1,16 +1,13 @@
 # Product Analytics Deep-Dive (SQL-First)
 
+![tests](https://img.shields.io/badge/tests-40%20passing-1a7a56) [![demo](https://img.shields.io/badge/demo-live-1d4e7c)](https://riya0920.github.io/product-analytics-deepdive/) ![license](https://img.shields.io/badge/license-MIT-555555)
+
 One stated business question, answered end-to-end in SQL over a DuckDB
 warehouse, with data-quality tests that are proven to catch planted defects and a
 decision memo that leads with the recommendation.
 
-> **Status: ~100% of the spec built.** The warehouse, the staging/marts models, **a
-> real dbt project with 34 passing tests, docs and lineage**, the committed
-> figures, the analysis, the memo, a **measured query-performance study**,
-> **segmentation with thin-cell and Simpson discipline**, and an **incrementality
-> study whose sensitivity analysis is validated and found wanting** are all done
-> and runnable. A BigQuery variant is the one thing this environment cannot host —
-> see [Roadmap](#roadmap).
+**[Browse the dbt lineage](https://riya0920.github.io/product-analytics-deepdive/)**
+
 
 ## The question
 
@@ -20,8 +17,8 @@ Fixed before any query was written. There is no exploratory chart wall here: EDA
 without a decision is tourism. The answer is in **[docs/MEMO.md](docs/MEMO.md)**,
 which is the artifact meant to be read first.
 
-**Headline:** add-to-cart loses 18,664 users at a 49.9% pass rate — the outlier
-in a funnel whose other steps convert at 73–85% — worth ~$50K at a 10% recovery
+**Headline:** add-to-cart loses 18,664 users at a 49.9% pass rate - the outlier
+in a funnel whose other steps convert at 73-85% - worth ~$50K at a 10% recovery
 assumption. And paid search purchases at 5.9% vs organic's 29.8% (95% CI on the
 difference: −24.7pp to −23.2pp).
 
@@ -57,18 +54,17 @@ The models are the **same SQL** as the hand-rolled runner, converted to
 `ref()`/`source()` so there is one source of truth rather than two copies that
 drift. What dbt adds over the runner:
 
-* **Schema tests as declarations** — `unique`, `not_null`, `accepted_values`,
+* **Schema tests as declarations** - `unique`, `not_null`, `accepted_values`,
   and a `relationships` test asserting every session's `user_id` exists in
   `stg_users`. That referential check is the one the hand-rolled suite did not
   have.
-* **Documentation next to the column it describes**, including the reasons —
-  why dedupe uses the natural key, why attribution is first-touch, why
+* **Documentation next to the column it describes**, including the reasons - why dedupe uses the natural key, why attribution is first-touch, why
   `max_recoverable_revenue` is an upper bound.
 * **Lineage**, generated into `target/manifest.json`, so the DAG is derived from
   the code rather than drawn by hand.
 
 **Why dbt for a solo project?** Tests, lineage and docs are what make a pipeline
-trustworthy to someone who did not write it — which is the whole point of a
+trustworthy to someone who did not write it - which is the whole point of a
 portfolio piece. It is also the team standard, so using it is a statement about
 team-readiness rather than tooling taste.
 
@@ -127,13 +123,13 @@ better; the projection buys **33%** by not storing columns the query never reads
 **Why the time result is not the whole story:** DuckDB is a vectorised in-process
 engine reading from local memory, where scan cost is small and layout matters
 little. On a distributed warehouse reading from object storage, bytes scanned
-*is* the cost model — BigQuery bills for it directly — so a 33% byte reduction
+*is* the cost model - BigQuery bills for it directly - so a 33% byte reduction
 that is invisible here would be a 33% cost reduction there. The measurement is
 reported as what it is: evidence about DuckDB, not about every engine.
 
 **A bug this measurement had first:** table sizes were read from
 `duckdb_tables().estimated_size`, which is a **row-count estimate, not bytes**.
-It reported all three layouts as identically sized — a number that looks like a
+It reported all three layouts as identically sized - a number that looks like a
 measurement and is not. Replaced with real parquet bytes on disk.
 
 ## Segmentation, and the discipline that makes it safe
@@ -145,7 +141,7 @@ cell in twenty looks significant with nothing going on) and **thin cells** (a
 anything). Every cell here carries a Wilson interval, cells under 300 users are
 excluded, and the exclusion count is printed so it is visible rather than quiet.
 
-**Does the paid-search gap survive conditioning on platform?** Yes — and that
+**Does the paid-search gap survive conditioning on platform?** Yes - and that
 matters, because a gap that only appeared in aggregate would be a platform-mix
 effect wearing a hat:
 
@@ -166,15 +162,14 @@ The first version of the cohort-over-cohort check fitted an **unweighted** slope
 and compared its total drift to a fixed two-point threshold. It reported a
 widening gap: −0.18 pp/week, −2.9 points over the window. The generator plants no
 cohort trend at all. Fitting the slope by **weighted** least squares and testing
-it against its own standard error gives z = −1.9 — not significant, and the
+it against its own standard error gives z = −1.9 - not significant, and the
 verdict flips to "standing quality difference, not a live regression". A magic
 threshold on an unweighted slope is precisely the machinery that turns noise into
 a roadmap item.
 
 ### What segmentation does to unvalidated data
 
-This is the part worth the module. The generator plants an iOS timezone bug —
-events stamped in local time rather than UTC. Run the platform cut on both
+This is the part worth the module. The generator plants an iOS timezone bug - events stamped in local time rather than UTC. Run the platform cut on both
 warehouses:
 
 | metric | clean iOS vs rest | uncleaned iOS vs rest | manufactured |
@@ -186,7 +181,7 @@ An eight-hour shift moves events across an exact-day boundary and invents a
 multi-point platform deficit; on an unbounded metric a whole tail of later
 activity absorbs it and the same bug is invisible. **Both numbers are correct.
 Only one of them is a finding, and nothing in the segmented output says which.**
-Segmentation on unvalidated data does not add noise — it adds confident, wrong
+Segmentation on unvalidated data does not add noise - it adds confident, wrong
 findings.
 
 ### Geography, and the decomposition that stops it becoming a bad recommendation
@@ -203,10 +198,9 @@ trap:
 EMEA retains **1.9 points worse** than APAC, and the confidence intervals do not
 overlap. Reported there, it reads as a product problem in EMEA.
 
-It is not. A regional gap has two explanations with *opposite* responses —
-a different channel mix (a marketing fact) or a worse experience within the same
-channel (a product fact) — and the headline number cannot tell them apart.
-**Kitagawa decomposition** (Oaxaca–Blinder for rates) separates them:
+It is not. A regional gap has two explanations with *opposite* responses - a different channel mix (a marketing fact) or a worse experience within the same
+channel (a product fact) - and the headline number cannot tell them apart.
+**Kitagawa decomposition** (Oaxaca - Blinder for rates) separates them:
 
     gap = Σ_c (w_A,c − w_B,c) · r̄_c        ← composition
         + Σ_c  w̄_c · (r_A,c − r_B,c)       ← rate
@@ -220,7 +214,7 @@ channel (a product fact) — and the headline number cannot tell them apart.
 Composition accounts for *more than the whole gap*; the within-channel term runs
 the other way by half a point and is indistinguishable from zero. **Within the
 same channel, EMEA and APAC are the same.** EMEA buys more paid search, and paid
-search retains worse everywhere — which the memo already knew. A product
+search retains worse everywhere - which the memo already knew. A product
 investigation into EMEA would be chasing a marketing fact.
 
 The symmetric form is used deliberately: weighting composition by one region's
@@ -228,7 +222,7 @@ rates and rates by the other's weights gives a different answer depending on
 which region you call the baseline, and there is no principled reason to prefer
 either direction. A test asserts that reversing the pair just flips the signs.
 
-**The generator plants no direct regional effect at all** — only a different
+**The generator plants no direct regional effect at all** - only a different
 channel mix per region. So a correct decomposition *must* return a
 non-significant rate term, and a test asserts exactly that. If the analysis ever
 starts finding a regional effect, it has found a bug in itself.
@@ -238,7 +232,7 @@ starts finding a regional effect, it has found a bug in itself.
 Region is drawn from a **separate RNG stream**, seeded independently of the main
 generator. That is not a stylistic choice: drawing it from the main stream would
 consume values and shift every subsequent draw, silently changing the funnel
-rates, the retention curves, and every figure the committed memo quotes — for a
+rates, the retention curves, and every figure the committed memo quotes - for a
 column that is supposed to be purely additive.
 
 The funnel after adding region is byte-identical to the funnel before it
@@ -255,8 +249,8 @@ paid search *causes* worse retention. The observed gap is
 
 and no amount of SQL over this table separates the terms, because the confounder
 is user intent and nobody logs intent. So the module simulates the situation with
-a **known** causal effect, runs what an analyst would actually run — raw
-difference, g-computation, inverse-propensity weighting — and then does the thing
+a **known** causal effect, runs what an analyst would actually run - raw
+difference, g-computation, inverse-propensity weighting - and then does the thing
 that is usually skipped: **validates the sensitivity analysis in a world where the
 answer is known.**
 
@@ -280,8 +274,8 @@ something to set a budget by.
 
 Two smaller things fell out of building it:
 
-* **The benchmark choice decides the answer.** The obvious comparison — the
-  strongest single measured covariate — is too weak by construction, because a
+* **The benchmark choice decides the answer.** The obvious comparison - the
+  strongest single measured covariate - is too weak by construction, because a
   latent confounder is generally stronger than any individual noisy measurement of
   it. Bundling the measured covariates into fitted indices and comparing top
   quartile to bottom raises the benchmark from 1.28 to 1.65 and is the defensible
@@ -299,7 +293,7 @@ switch ads off for one user, and that single fact costs almost all the power:
 * Between-geo retention SD is ~4.5 points, which dominates the binomial noise
   inside a geo and sets the MDE.
 * At 60 geos the study detects a **3.3 point** change. The 2.0 point target needs
-  **159 geos** — or pre-period adjustment at **ρ ≥ 0.79**, solved rather than read
+  **159 geos** - or pre-period adjustment at **ρ ≥ 0.79**, solved rather than read
   off a table of round numbers, and itself an assumption to check.
 
 And what it still cannot do: a holdout measures the effect of **turning paid
@@ -319,21 +313,21 @@ data/events.parquet          380,798 events, 59,998 users, 120 days
 ```
 
 Models are plain `.sql` files with a declared dependency order, run by a ~100-line
-runner. Tests are `.sql` files that must return **zero rows** — dbt's contract,
+runner. Tests are `.sql` files that must return **zero rows** - dbt's contract,
 implemented small enough that the SQL stays the artifact rather than the tool
 configuration.
 
 ## The SQL worth reading
 
-**Sessionisation** (`mart_sessions.sql`) — the canonical live-round exercise:
+**Sessionisation** (`mart_sessions.sql`) - the canonical live-round exercise:
 `LAG` for the previous event, a boolean for gap-exceeded, then a running `SUM`
 over that boolean to allocate session ids.
 
-**Funnel** (`mart_funnel.sql`) — `LAG` for the previous step's population,
+**Funnel** (`mart_funnel.sql`) - `LAG` for the previous step's population,
 `FIRST_VALUE` for cumulative conversion, drop-off quantified in users *and*
 dollars.
 
-**Retention** (`mart_retention.sql`) — emits both `dN_exact` and `dN_plus`,
+**Retention** (`mart_retention.sql`) - emits both `dN_exact` and `dN_plus`,
 because those two definitions disagree and papering over that is how retention
 numbers stop being comparable between teams. `COUNT(DISTINCT user_id)` inside the
 day filter is what stops a user active three times on day 7 counting three times,
@@ -355,19 +349,19 @@ FAIL assert_no_platform_hour_skew      ('ios','web', 4.92, 12.94, 8.02)
 **Two of these were harder than they look:**
 
 *Duplicates* are deduplicated on `(user_id, event_name, event_ts)` and **not** on
-`event_id` — retried client beacons carry a fresh request id, so a surrogate-key
+`event_id` - retried client beacons carry a fresh request id, so a surrogate-key
 dedupe finds nothing and leaves every count inflated. The dedupe recovers the
 planted rate: 1.48% measured against 1.5% planted.
 
 *The timezone bug* passes every ordering assertion, because a uniform per-platform
-shift preserves event order — signup is still first, the funnel is still
-monotonic — while every cohort-day boundary is silently wrong. It is only visible
+shift preserves event order - signup is still first, the funnel is still
+monotonic - while every cohort-day boundary is silently wrong. It is only visible
 in the **distribution**, and only under a **circular** mean: hour-of-day wraps at
 midnight, and with an evening-peaked traffic profile the arithmetic means differ
 by just 2.4 hours, which hides under any sensible threshold. The circular mean
 recovers the true separation exactly: **8.02 hours**.
 
-## Ground truth is recoverable — that's what validates the pipeline
+## Ground truth is recoverable - that's what validates the pipeline
 
 The generator's true step rates are known, so the pipeline can be checked rather
 than trusted. `test_funnel_recovers_the_true_step_rates_within_each_channel`
@@ -378,8 +372,7 @@ That test is checked **per channel, and the reason is a finding in itself.** The
 pooled funnel does *not* equal `true_rate x average_multiplier`: each step
 selects on survival, so users still in the funnel at add-to-cart are
 disproportionately from high-quality channels and the effective mix drifts upward
-step by step. Pooled add-to-cart measures 0.499 against a naive 0.468 prediction
-— that 3-point gap is survivorship, not error. Within a single channel there is
+step by step. Pooled add-to-cart measures 0.499 against a naive 0.468 prediction - that 3-point gap is survivorship, not error. Within a single channel there is
 no mix to drift, and the generator's rate comes back exactly.
 
 ## Two analysis bugs this project found and fixed
@@ -392,39 +385,19 @@ no mix to drift, and the generator's rate comes back exactly.
    return hazard drove 30-day retention to nearly zero, so the D30 number was a
    property of the generator rather than of anything worth analysing. Real
    retention curves flatten because a minority of users form a habit; the
-   generator now has a loyal segment and D30+ lands at a realistic 22–25%.
+   generator now has a loyal segment and D30+ lands at a realistic 22-25%.
 
 Both are in the git history rather than quietly corrected, because the second one
 in particular would have made the memo size a fake problem.
 
-## Roadmap
+## Known limitations
 
-| Milestone | Status |
+Things this repository does not prove, and what each one would need.
+
+| limitation | why |
 |---|---|
-| Event generator with planted defects + known ground truth | done |
-| Staging models: dedupe, timezone fix, attribution | done |
-| Marts: sessions, funnel, retention, quality audit | done |
-| SQL assertion tests + inverted proof they catch defects | done |
-| One statistical comparison done properly (CI + z-test) | done |
-| Opportunity sizing with named assumptions | done |
-| Decision memo | done |
-| dbt project: 6 models, 34 tests, docs, lineage | done |
-| Referential integrity test (sessions -> users) | done |
-| Committed figures generated from the warehouse | done |
-| Query-performance study: three layouts, timings and real bytes | done |
-| Segmentation: channel x platform x cohort, Wilson intervals, thin-cell exclusion | done |
-| Simpson-reversal check, reported even when null | done |
-| Timezone bug shown to manufacture a platform effect on a fragile metric | done |
-| Incrementality: g-computation, IPW, E-value, validated against known truth | done |
-| Geo-holdout design priced, including the pre-period correlation it needs | done |
 | **BigQuery variant (bytes-scanned is the cost model there)** | not possible here: no BigQuery |
-| Geographic segmentation with a Kitagawa composition/rate decomposition | done |
 | **Actually running the geo holdout** | not possible here: it needs a live ad account |
-
-The memo still reports that paid search *retains* worse and still does **not**
-claim paid search *causes* worse retention. What changed is that the size of the
-gap between those two statements is now measured, and the experiment that would
-close it is costed.
 
 ## Honesty notes
 

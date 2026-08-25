@@ -1,7 +1,7 @@
 """Tests for segmentation and the incrementality study.
 
 The theme is the same as the rest of this repo: assert against something known.
-For segmentation that means the planted timezone bug — the tests check it
+For segmentation that means the planted timezone bug - the tests check it
 manufactures a platform effect on a fragile metric and not on a robust one. For
 incrementality it means the simulated world's `tau`, which lets the estimators be
 scored rather than admired.

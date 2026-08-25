@@ -1,4 +1,4 @@
-# Where we lose new users in week one — and what it is worth to fix
+# Where we lose new users in week one - and what it is worth to fix
 
 **To:** Growth / Product
 **From:** Analytics
@@ -14,12 +14,12 @@ same users as organic.**
 
 Add-to-cart is where we lose the most people by a wide margin: **18,664 users
 (50.1% of everyone who reaches it)** drop there. Recovering even a tenth of them
-is worth roughly **$50K** on this dataset — and it is the only step where a
+is worth roughly **$50K** on this dataset - and it is the only step where a
 double-digit relative improvement is plausible, because the other three steps
-already convert at 73–85%.
+already convert at 73-85%.
 
 The second finding is cheaper to act on: **paid search users purchase at 5.9% vs
-organic's 29.8%** — an 80% relative gap that is not noise (95% CI on the
+organic's 29.8%** - an 80% relative gap that is not noise (95% CI on the
 difference: **−24.7pp to −23.2pp**). We are paying to acquire our worst-retaining
 cohort, and week-one loss is concentrated there.
 
@@ -29,14 +29,14 @@ cohort, and week-one loss is concentrated there.
 
 | step | users | step conversion | users lost | cumulative |
 |---|---|---|---|---|
-| signup | 59,771 | — | — | 100.0% |
+| signup | 59,771 | - | - | 100.0% |
 | activate | 43,731 | 73.2% | 16,040 | 73.2% |
 | first_search | 37,232 | 85.1% | 6,499 | 62.3% |
 | **add_to_cart** | **18,568** | **49.9%** | **18,664** | **31.1%** |
 | purchase | 11,877 | 64.0% | 6,691 | 19.9% |
 
-Two steps lose ~16–19K users each, but they are not equally fixable. Activation
-loses 16,040 at a 73.2% pass rate — already decent, so a fix there is fighting for
+Two steps lose ~16-19K users each, but they are not equally fixable. Activation
+loses 16,040 at a 73.2% pass rate - already decent, so a fix there is fighting for
 the last quartile. Add-to-cart passes only **49.9%**, which is the outlier in this
 funnel and the step where the headroom is.
 
@@ -64,7 +64,7 @@ and never closes the gap. Paid search is our second-largest channel by volume
 ## The statistical comparison
 
 Purchase rate, paid search vs organic, two-proportion z-test (pooled SE for the
-p-value, unpooled SE for the interval — using one for both is a real
+p-value, unpooled SE for the interval - using one for both is a real
 inconsistency near the boundary):
 
 | | organic | paid_search |
@@ -93,7 +93,7 @@ precise than it is:
 
 Every one of these is an **upper bound**, and here is exactly why:
 
-1. **Recovered users are assumed to convert downstream at 64.0%** — the rate of
+1. **Recovered users are assumed to convert downstream at 64.0%** - the rate of
    users who *already passed* add-to-cart. Users who dropped are systematically
    less engaged, so their true downstream rate is lower. This is the single
    largest source of optimism in the estimate.
@@ -113,7 +113,7 @@ Bounding what the conclusions can carry:
 
 | issue | scale | handling |
 |---|---|---|
-| duplicate events | 4,851 rows (1.48%) | deduplicated on `(user_id, event_name, event_ts)`, **not** on `event_id` — retried beacons carry fresh ids, so a surrogate-key dedupe finds nothing |
+| duplicate events | 4,851 rows (1.48%) | deduplicated on `(user_id, event_name, event_ts)`, **not** on `event_id` - retried beacons carry fresh ids, so a surrogate-key dedupe finds nothing |
 | ios timezone bug | all ios events, −8h | corrected in staging; caught by a circular-mean hour-of-day test, since a uniform shift preserves event *order* and passes every ordering assertion |
 | null `user_id` | 1,293 rows (0.40%) | excluded from staging, counted in the audit model |
 | right-censoring | recent cohorts | excluded per retention horizon |
@@ -131,14 +131,14 @@ Bounding what the conclusions can carry:
   unaffected here, but a last-touch model would move users between these buckets
   and could change the paid-search gap.
 * **Seasonality is not controlled.** 120 days covers roughly one quarter with no
-  holiday period, so no seasonal correction was applied — and none is claimed.
+  holiday period, so no seasonal correction was applied - and none is claimed.
 
 ## Next step
 
 The recommendation above is a hypothesis with a price tag, not a proven win. The
 correct next move is an **A/B test on the add-to-cart step**, powered against the
 49.9% baseline. At ~18,500 users per arm, that test can detect roughly a **+3%
-relative** change at 80% power — comfortably inside the range worth shipping for.
+relative** change at 80% power - comfortably inside the range worth shipping for.
 
 ## On the paid-search gap, and what it would cost to settle
 
@@ -155,7 +155,7 @@ pure-selection gap from a real one here**, and a threshold rule on it would call
 selection causal.
 
 So the decision-relevant question needs an experiment, and the experiment is a
-**geo holdout** — pause paid search in a randomised set of geos. Its cost is not
+**geo holdout** - pause paid search in a randomised set of geos. Its cost is not
 in users, it is in geos:
 
 * 60 geos at 900 users/week is 54,000 users a week, and that number does not
@@ -174,5 +174,5 @@ as evidence of no effect.
 *Data is simulated. Dollar magnitudes are meaningful only relative to other
 figures in this dataset and are not real-world claims. The generator's true step
 rates are known, and the pipeline recovers them: true activation 0.72 against a
-measured 0.732, which is exactly the 1.017 channel-mix multiplier — the recovery
+measured 0.732, which is exactly the 1.017 channel-mix multiplier - the recovery
 of ground truth is what validates the pipeline.*

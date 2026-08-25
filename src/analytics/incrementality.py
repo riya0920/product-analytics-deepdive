@@ -30,10 +30,10 @@ logs intent.
 3. Computes an **E-value** (VanderWeele & Ding 2017): the minimum strength, on the
    risk-ratio scale, that an unmeasured confounder would need with *both* channel
    and retention to explain the adjusted estimate away entirely.
-4. Benchmarks that E-value against the confounders actually measured — both the
+4. Benchmarks that E-value against the confounders actually measured - both the
    strongest single one (the comparison people reach for, and too weak by
    construction) and all of them bundled (the defensible one).
-5. Prices the experiment that would settle it — a geo holdout — including how long
+5. Prices the experiment that would settle it - a geo holdout - including how long
    it has to run.
 
 ## The result that matters, and it is a negative one
@@ -42,8 +42,8 @@ The plan was that the E-value would separate a pure-selection world from a
 real-effect one. **It does not.** Run with `tau = 0`, where the true causal effect
 is exactly zero, and adjustment still leaves -12.0 points; the E-value for that
 residual is 1.69 against a bundled benchmark of 1.65, so it *clears* the benchmark
-in a world with no causal effect at all. Only the margin differs — 1.02x against
-1.23x — and a margin with no sampling distribution is not something to set a
+in a world with no causal effect at all. Only the margin differs - 1.02x against
+1.23x - and a margin with no sampling distribution is not something to set a
 budget by.
 
 That failure is the useful output. It is the argument for running the geo holdout
@@ -221,8 +221,7 @@ def e_value(risk_ratio: float) -> float:
     """VanderWeele & Ding's E-value.
 
     The minimum strength of association, on the risk-ratio scale, that an
-    unmeasured confounder would need with **both** the exposure and the outcome —
-    above and beyond the measured covariates — to fully explain away an observed
+    unmeasured confounder would need with **both** the exposure and the outcome - above and beyond the measured covariates - to fully explain away an observed
     association.
 
     It is a lower bound on required confounding, not a p-value and not a

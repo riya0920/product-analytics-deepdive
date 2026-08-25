@@ -9,10 +9,10 @@ nothing and nobody checks.
 
 Three optimisations are measured against the same queries on the same data:
 
-  1. **Sorted (clustered) storage** — writing `stg_events` ordered by
+  1. **Sorted (clustered) storage** - writing `stg_events` ordered by
      `(user_id, event_ts)`, which is the order the window functions consume it in
   2. **Date partitioning by Hive-style directories** on the parquet export
-  3. **A covering projection** — a narrow table with only the columns the funnel
+  3. **A covering projection** - a narrow table with only the columns the funnel
      needs, so the scan reads a fraction of the bytes
 
 Each is timed over several repeats with the median reported, because a single
