@@ -1,4 +1,4 @@
-__pycache__/
+﻿__pycache__/
 *.pyc
 .pytest_cache/
 data/*.parquet
@@ -7,3 +7,5 @@ dbt/target/
 dbt/logs/
 dbt/dbt_packages/
 data/layouts/
+
+.claude/
