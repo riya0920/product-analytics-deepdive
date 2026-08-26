@@ -227,6 +227,57 @@ channel mix per region. So a correct decomposition *must* return a
 non-significant rate term, and a test asserts exactly that. If the analysis ever
 starts finding a regional effect, it has found a bug in itself.
 
+### Does the headline survive being cut by everything else?
+
+`make slice-check` takes a pooled comparison and re-runs it inside every slice of
+the other columns. It is the strongest thing observational data supports: not
+proof of *why*, but a check that the finding is not an artifact of composition.
+
+Organic converts at **29.84%** against paid search at **5.88%**, a 5.08x gap. Cut
+fifteen ways, it does not move:
+
+| cut | slices | reversals | verdict |
+|---|---|---|---|
+| platform | 3 | 0 | ratios 4.67x to 5.29x |
+| region | 3 | 0 | ratios 4.58x to 5.21x |
+| platform x region | 9 | 0 | ratios 3.92x to 6.13x |
+
+Every one of the fifteen was powered to detect a reversal, and the smallest cell
+was 531 users. That is consistent with the effect living in the channel rather
+than in the device or the region.
+
+**The same tool run on a gap that is pure composition says so.** Pooled by region,
+APAC converts at 22.65% and EMEA at 17.69%, and the confidence intervals do not
+overlap. Condition on channel and it evaporates:
+
+```
+organic:      amer 29.94%   apac 29.46%   emea 30.06%
+paid_search:  amer  5.74%   apac  6.44%   emea  5.84%
+```
+
+EMEA buys 29.1% paid search against APAC's 12.3%. The tool reports **COLLAPSES**
+for that comparison and **HOLDS** for the channel one, which is the only reason
+the second result is worth anything.
+
+### Two ways this check turns into a rubber stamp, and what stops them
+
+**Counting sign flips.** Cut finely enough and something flips from noise alone,
+so a naive count grows with the number of slices rather than the evidence. A
+reversal is only called real when the gap's interval excludes zero; a flip that
+cannot be told from zero is printed as `flipped (n.s.)`.
+
+**Counting silence as agreement.** This one was a real bug, caught by running the
+tool against the composition case above. A slice that is powered and shows *no*
+effect is evidence **against** the headline, and the first draft counted it as
+agreement because it had not reversed. On a gap that was entirely composition it
+printed `HOLDS in every powered slice`, which is precisely backwards. Powered
+slices are now split into held and vanished, and vanished ones drive the verdict
+toward `COLLAPSES`. `test_pure_composition_gap_is_reported_as_collapsing` pins it.
+
+Slices too small to resolve an effect the size of the headline are marked
+`underpowered` and are not counted as agreement either, because "no reversals"
+across cells that could never have shown one is not evidence.
+
 ### Adding a column without moving a single existing number
 
 Region is drawn from a **separate RNG stream**, seeded independently of the main

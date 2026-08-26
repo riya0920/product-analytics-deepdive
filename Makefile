@@ -25,3 +25,7 @@ incrementality:
 	PYTHONPATH=src python -m analytics.incrementality validate
 geo-design:
 	PYTHONPATH=src python -m analytics.incrementality design
+
+slice-check:
+	PYTHONPATH=src python -m analytics.slice_check
+	PYTHONPATH=src python -m analytics.slice_check --by region --focus apac --baseline emea --dims platform channel
