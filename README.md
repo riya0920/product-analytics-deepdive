@@ -351,6 +351,94 @@ And what it still cannot do: a holdout measures the effect of **turning paid
 search off**, which is the decision-relevant quantity, not the effect of a
 paid-search user being a paid-search user. Organic pickup means those differ.
 
+## Grading the methods against a real experiment
+
+Every other number in this repository comes from a generator I wrote, which means
+I chose the answer before I measured it. `make lalonde` runs the same exercise on
+data where somebody else chose the answer, by running an actual randomised trial
+on actual people.
+
+The National Supported Work Demonstration (LaLonde 1986; comparison groups from
+Dehejia and Wahba 1999) randomly assigned unemployed men to a subsidised training
+programme. Random assignment means the earnings difference **is** the causal
+effect, no adjustment required.
+
+**Ground truth: $1,794** (95% CI $479 to $3,109, 185 treated vs 260 control).
+
+The same release ships two observational comparison groups pulled from national
+surveys, PSID and CPS. Swapping the real control arm for one of them is exactly
+what an analyst does when there is no experiment. So the setup grades itself.
+
+### The naive answer is not merely wrong, it is confidently backwards
+
+| comparison | estimate | verdict |
+|---|---|---|
+| randomised control (truth) | **+$1,794** | |
+| vs PSID survey controls | **−$15,205** | wrong sign, off by $17,000 |
+| vs CPS survey controls | **−$8,498** | wrong sign, off by $10,300 |
+
+The PSID answer says a job training programme **destroyed fifteen thousand dollars
+of annual earnings**, with a 95% interval of −$16,493 to −$13,917 that does not
+come close to containing zero, let alone the truth. Precisely wrong is worse than
+noisy, because nothing about the output invites a second look.
+
+### The grader is checked against the case where it should succeed
+
+Run against the *real* randomised control, every estimator lands on the truth:
+
+| method | estimate | covers truth |
+|---|---|---|
+| naive difference | $1,794 | yes |
+| OLS with covariates | $1,676 | yes |
+| propensity matching | $2,562 | yes |
+| IPW (trimmed) | $1,641 | yes |
+| AIPW (doubly robust) | $1,619 | yes |
+
+That has to pass before any result on PSID is worth reading, and
+`test_harness_recovers_truth_on_the_experimental_control` pins it. The OLS figure
+of $1,676 is also the published Dehejia and Wahba regression estimate, which is a
+second, external check on the implementation.
+
+### The result worth arguing about
+
+Against the PSID controls, the methods disagree with each other, and **the
+sophisticated ones lose**:
+
+| method | estimate | bias | sign |
+|---|---|---|---|
+| naive difference | −$15,205 | −$16,999 | WRONG |
+| OLS with covariates | $752 | −$1,042 | ok |
+| **propensity matching** | **$2,697** | **+$903** | **ok, covers truth** |
+| IPW (trimmed) | −$1,887 | −$3,681 | **WRONG** |
+| AIPW (doubly robust) | −$1,185 | −$2,979 | **WRONG** |
+
+**The doubly robust estimator gets the sign wrong.** It is the one with two
+chances to be right, it is the one a methods section would describe as the safe
+choice, and on this data it concludes the programme cost people money. Plain
+one-to-one matching, which is the least clever thing in the table, is the only
+method that both recovers the truth and covers it.
+
+### Overlap said so in advance
+
+The diagnostic that explains it runs before any estimate:
+
+| control group | covariates imbalanced | worst | controls reaching the lowest treated propensity |
+|---|---|---|---|
+| randomised control | 4 of 8 | −0.30 SD | 95.8% |
+| PSID | **8 of 8** | **−1.84 SD** | **44.1%** |
+| CPS | 7 of 8 | +2.43 SD | 35.4% |
+
+Fewer than half the PSID controls are even as likely to be treated as the least
+likely treated man. Weighting cannot fix that, because the weights are being
+asked to stand in for people who are not in the data. Matching survives precisely
+because it **discards** the unmatchable instead of reweighting them, which is why
+the module reports `unmatched_treated` alongside every matched estimate: a
+matched number without it has quietly changed which population it is about.
+
+The transferable rule is that **overlap is a precondition, not a diagnostic to
+run afterwards**. Every method in that table is correct given its assumptions.
+The assumption that fails is the one nobody writes down.
+
 ## The pipeline
 
 ```

@@ -1,0 +1,277 @@
+{
+  "truth": {
+    "estimate": 1794.342404270271,
+    "se": 670.9965463815241,
+    "ci_low": 479.18917336248364,
+    "ci_high": 3109.4956351780584,
+    "n_treated": 185,
+    "n_control": 260,
+    "method": "randomised experiment"
+  },
+  "comparisons": [
+    {
+      "control_group": "experimental_control",
+      "overlap": {
+        "smd": {
+          "age": 0.10727712146617467,
+          "educ": 0.14121982079828682,
+          "black": 0.04388661137007063,
+          "hispan": -0.1745610713731719,
+          "married": 0.09364070075641238,
+          "nodegree": -0.30398643906182043,
+          "re74": -0.00215995119061845,
+          "re75": 0.08386324541782075
+        },
+        "worst_covariate": "nodegree",
+        "worst_smd": -0.30398643906182043,
+        "n_covariates_imbalanced": 4,
+        "propensity_treated_median": 0.4089902101545077,
+        "propensity_control_median": 0.37646164043632213,
+        "controls_above_treated_min": 0.9576923076923077,
+        "fraction_in_common_support": 0.9662921348314607
+      },
+      "estimates": [
+        {
+          "estimate": 1794.342404270271,
+          "se": 670.9965463815241,
+          "ci_low": 479.18917336248364,
+          "ci_high": 3109.4956351780584,
+          "n_treated": 185,
+          "n_control": 260,
+          "method": "naive difference",
+          "bias": 0.0,
+          "sign_correct": true,
+          "covers_truth": true
+        },
+        {
+          "method": "OLS with covariates",
+          "estimate": 1676.3426437679402,
+          "se": 638.6820153808542,
+          "ci_low": 424.52589362146614,
+          "ci_high": 2928.159393914414,
+          "n_treated": 185,
+          "n_control": 260,
+          "bias": -117.99976050233067,
+          "sign_correct": true,
+          "covers_truth": true
+        },
+        {
+          "method": "propensity matching",
+          "estimate": 2561.6486690810807,
+          "se": 641.5813581437245,
+          "ci_low": 1304.1492071193807,
+          "ci_high": 3819.1481310427807,
+          "matched_pairs": 185,
+          "unmatched_treated": 0,
+          "n_treated": 185,
+          "n_control": 260,
+          "bias": 767.3062648108098,
+          "sign_correct": true,
+          "covers_truth": true
+        },
+        {
+          "method": "IPW (trimmed)",
+          "estimate": 1640.5513933964767,
+          "se": 625.3857319657843,
+          "ci_low": 414.7953587435395,
+          "ci_high": 2866.307428049414,
+          "dropped_by_trim": 0,
+          "max_weight": 4.149508873578777,
+          "n_treated": 185,
+          "n_control": 260,
+          "bias": -153.79101087379422,
+          "sign_correct": true,
+          "covers_truth": true
+        },
+        {
+          "method": "AIPW (doubly robust)",
+          "estimate": 1619.3550181971343,
+          "se": 612.4409770174749,
+          "ci_low": 418.9707032428835,
+          "ci_high": 2819.739333151385,
+          "n_treated": 185,
+          "n_control": 260,
+          "bias": -174.98738607313658,
+          "sign_correct": true,
+          "covers_truth": true
+        }
+      ]
+    },
+    {
+      "control_group": "psid",
+      "overlap": {
+        "smd": {
+          "age": -1.009432683149511,
+          "educ": -0.6805169734422499,
+          "black": 1.479802531518478,
+          "hispan": 0.1285907971687595,
+          "married": -1.8423346660231166,
+          "nodegree": 0.8792132091127671,
+          "re74": -1.717826082480409,
+          "re75": -1.774366952479346
+        },
+        "worst_covariate": "married",
+        "worst_smd": -1.8423346660231166,
+        "n_covariates_imbalanced": 8,
+        "propensity_treated_median": 0.7400957535739772,
+        "propensity_control_median": 0.0003190478575096806,
+        "controls_above_treated_min": 0.44096385542168676,
+        "fraction_in_common_support": 0.4706542056074766
+      },
+      "estimates": [
+        {
+          "estimate": -15204.777468026914,
+          "se": 657.0763153236787,
+          "ci_low": -16492.647046061324,
+          "ci_high": -13916.907889992504,
+          "n_treated": 185,
+          "n_control": 2490,
+          "method": "naive difference",
+          "bias": -16999.119872297186,
+          "sign_correct": false,
+          "covers_truth": false
+        },
+        {
+          "method": "OLS with covariates",
+          "estimate": 751.9464318950864,
+          "se": 915.2571894200713,
+          "ci_low": -1041.9576593682532,
+          "ci_high": 2545.8505231584263,
+          "n_treated": 185,
+          "n_control": 2490,
+          "bias": -1042.3959723751846,
+          "sign_correct": true,
+          "covers_truth": true
+        },
+        {
+          "method": "propensity matching",
+          "estimate": 2697.2178707567564,
+          "se": 637.9518737589812,
+          "ci_low": 1446.8321981891534,
+          "ci_high": 3947.6035433243596,
+          "matched_pairs": 185,
+          "unmatched_treated": 0,
+          "n_treated": 185,
+          "n_control": 2490,
+          "bias": 902.8754664864855,
+          "sign_correct": true,
+          "covers_truth": true
+        },
+        {
+          "method": "IPW (trimmed)",
+          "estimate": -1886.5389587192512,
+          "se": 994.0942457781431,
+          "ci_low": -3834.9636804444117,
+          "ci_high": 61.88576300590921,
+          "dropped_by_trim": 1908,
+          "max_weight": 50.68677385755361,
+          "n_treated": 185,
+          "n_control": 2490,
+          "bias": -3680.881362989522,
+          "sign_correct": false,
+          "covers_truth": false
+        },
+        {
+          "method": "AIPW (doubly robust)",
+          "estimate": -1184.5093486795122,
+          "se": 659.2727167394055,
+          "ci_low": -2476.683873488747,
+          "ci_high": 107.66517612972257,
+          "n_treated": 185,
+          "n_control": 2490,
+          "bias": -2978.851752949783,
+          "sign_correct": false,
+          "covers_truth": false
+        }
+      ]
+    },
+    {
+      "control_group": "cps",
+      "overlap": {
+        "smd": {
+          "age": -0.7961833136032838,
+          "educ": -0.6785020937631997,
+          "black": 2.4277468150409307,
+          "hispan": -0.0506973051849916,
+          "married": -1.2326475800510805,
+          "nodegree": 0.903811055230219,
+          "re74": -1.5689896088899171,
+          "re75": -1.7464280567572683
+        },
+        "worst_covariate": "black",
+        "worst_smd": 2.4277468150409307,
+        "n_covariates_imbalanced": 7,
+        "propensity_treated_median": 0.26089557153810056,
+        "propensity_control_median": 0.00016466501739199944,
+        "controls_above_treated_min": 0.3536768384192096,
+        "fraction_in_common_support": 0.36100636706435063
+      },
+      "estimates": [
+        {
+          "estimate": -8497.516142636992,
+          "se": 583.4320770838137,
+          "ci_low": -9641.043013721268,
+          "ci_high": -7353.989271552718,
+          "n_treated": 185,
+          "n_control": 15992,
+          "method": "naive difference",
+          "bias": -10291.858546907264,
+          "sign_correct": false,
+          "covers_truth": false
+        },
+        {
+          "method": "OLS with covariates",
+          "estimate": 699.1317762465089,
+          "se": 547.6360696071229,
+          "ci_low": -374.2349201834518,
+          "ci_high": 1772.4984726764696,
+          "n_treated": 185,
+          "n_control": 15992,
+          "bias": -1095.210628023762,
+          "sign_correct": true,
+          "covers_truth": false
+        },
+        {
+          "method": "propensity matching",
+          "estimate": 1666.1082174054054,
+          "se": 701.529474473553,
+          "ci_low": 291.1104474372414,
+          "ci_high": 3041.1059873735694,
+          "matched_pairs": 185,
+          "unmatched_treated": 0,
+          "n_treated": 185,
+          "n_control": 15992,
+          "bias": -128.23418686486548,
+          "sign_correct": true,
+          "covers_truth": true
+        },
+        {
+          "method": "IPW (trimmed)",
+          "estimate": -253.4661877309045,
+          "se": 1070.7147871355114,
+          "ci_low": -2352.067170516507,
+          "ci_high": 1845.1347950546979,
+          "dropped_by_trim": 14472,
+          "max_weight": 98.82202361359066,
+          "n_treated": 185,
+          "n_control": 15992,
+          "bias": -2047.8085920011754,
+          "sign_correct": false,
+          "covers_truth": true
+        },
+        {
+          "method": "AIPW (doubly robust)",
+          "estimate": 67.55713393466077,
+          "se": 894.6300039872683,
+          "ci_low": -1685.917673880385,
+          "ci_high": 1821.0319417497064,
+          "n_treated": 185,
+          "n_control": 15992,
+          "bias": -1726.7852703356102,
+          "sign_correct": true,
+          "covers_truth": true
+        }
+      ]
+    }
+  ]
+}

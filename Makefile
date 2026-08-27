@@ -29,3 +29,9 @@ geo-design:
 slice-check:
 	PYTHONPATH=src python -m analytics.slice_check
 	PYTHONPATH=src python -m analytics.slice_check --by region --focus apac --baseline emea --dims platform channel
+
+lalonde-data:
+	PYTHONPATH=src python -m analytics.lalonde_lab --download
+
+lalonde: lalonde-data
+	PYTHONPATH=src python -m analytics.lalonde_lab

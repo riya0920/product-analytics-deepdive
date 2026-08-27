@@ -9,3 +9,6 @@ dbt/dbt_packages/
 data/layouts/
 
 .claude/
+
+# Third-party research data, fetched by `make lalonde-data`
+data/lalonde/
