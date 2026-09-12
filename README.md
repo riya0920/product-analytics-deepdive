@@ -462,6 +462,19 @@ errors by unit** (the DiD error is correlated within a unit over time). The
 biased row is reported as-is rather than tuned away, because the point is that the
 method fails loudly, not that it always works.
 
+## Cloud (GCP) pipeline
+
+The same `data/events.parquet` also feeds a cloud-native ELT path
+([`cloud/README.md`](cloud/README.md)): raw daily event files land in Cloud
+Storage, a **Cloud Function** aggregates them with the pure `cloud/transform.py`
+(380,798 events → 8,846 daily-metric rows), and they load into a partitioned,
+clustered **BigQuery** table, driven by a **Cloud Scheduler** daily job. The
+`infra/` Terraform provisions the bucket, dataset/table, both functions,
+scheduler, and a least-privilege service account; IAM and cost (Always-Free, $0)
+are documented. The transform is unit-tested on the real events and the function
+path is tested with GCS/BigQuery mocked (`pytest cloud/tests`). Deploying to a
+live project needs your GCP auth — the commands are in `cloud/README.md`.
+
 ## The pipeline
 
 ```

@@ -1,0 +1,15 @@
+[
+  {"name": "event_date", "type": "DATE", "mode": "REQUIRED"},
+  {"name": "channel", "type": "STRING", "mode": "REQUIRED"},
+  {"name": "platform", "type": "STRING", "mode": "REQUIRED"},
+  {"name": "region", "type": "STRING", "mode": "REQUIRED"},
+  {"name": "sessions", "type": "INTEGER", "mode": "REQUIRED"},
+  {"name": "signups", "type": "INTEGER", "mode": "REQUIRED"},
+  {"name": "searches", "type": "INTEGER", "mode": "REQUIRED"},
+  {"name": "add_to_cart", "type": "INTEGER", "mode": "REQUIRED"},
+  {"name": "activations", "type": "INTEGER", "mode": "REQUIRED"},
+  {"name": "purchases", "type": "INTEGER", "mode": "REQUIRED"},
+  {"name": "unique_users", "type": "INTEGER", "mode": "REQUIRED"},
+  {"name": "revenue", "type": "FLOAT", "mode": "REQUIRED"},
+  {"name": "conversion_rate", "type": "FLOAT", "mode": "REQUIRED"}
+]

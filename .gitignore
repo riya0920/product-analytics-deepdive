@@ -12,3 +12,11 @@ data/layouts/
 
 # Third-party research data, fetched by `make lalonde-data`
 data/lalonde/
+
+# Task 2 cloud pipeline artifacts
+infra/.terraform/
+infra/.terraform.lock.hcl
+infra/build/
+infra/*.tfstate*
+cloud/_landing/
+cloud/**/__pycache__/
