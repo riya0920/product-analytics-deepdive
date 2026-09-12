@@ -462,6 +462,29 @@ errors by unit** (the DiD error is correlated within a unit over time). The
 biased row is reported as-is rather than tuned away, because the point is that the
 method fails loudly, not that it always works.
 
+## Instrumental variables, and the two assumptions it rests on
+
+`make iv` grades two-stage least squares against a **planted** effect (beta = 2.0)
+when an **unobserved confounder** drives both the treatment and the outcome — the
+case OLS cannot handle. An instrument Z moves the treatment but (if valid) affects
+the outcome only through it, so 2SLS uses the confounder-free part of the
+variation.
+
+| scenario | first-stage F | OLS estimate (bias) | 2SLS estimate (bias) | 2SLS CI covers beta |
+| --- | --- | --- | --- | --- |
+| strong, valid instrument | 1184 | +2.53 (+0.53) | +1.97 (−0.03) | yes |
+| weak instrument | 1.8 | +2.70 (+0.70) | +1.23 (se **1.23**) | — unreliable |
+| exclusion restriction violated | 1184 | +2.88 (+0.88) | +3.49 (**+1.49**) | no |
+
+OLS is biased by the confounder in every row. With a strong valid instrument 2SLS
+recovers beta. IV has **two** failure modes and both are shown: a **weak
+instrument** (first-stage F below the Staiger–Stock threshold of 10) makes 2SLS
+high-variance and untrustworthy — the F=1.8 diagnostic is the tell; and a
+**violated exclusion restriction** (Z affects the outcome directly) biases 2SLS
+by the direct path *even though the first-stage F still looks strong* — a
+reminder that the F-test checks relevance, not validity. The biased rows are
+reported as-is.
+
 ## Cloud (GCP) pipeline
 
 The same `data/events.parquet` also feeds a cloud-native ELT path

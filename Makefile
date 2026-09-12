@@ -1,4 +1,4 @@
-.PHONY: generate build test analysis prove charts dbt dbt-docs all segments incrementality geo-design did lalonde
+.PHONY: generate build test analysis prove charts dbt dbt-docs all segments incrementality geo-design did iv lalonde
 generate:
 	PYTHONPATH=src python -m analytics.generate --users 60000 --days 120
 build:
@@ -32,6 +32,9 @@ slice-check:
 
 did:
 	PYTHONPATH=src python -m analytics.did_lab
+
+iv:
+	PYTHONPATH=src python -m analytics.iv_lab
 
 lalonde-data:
 	PYTHONPATH=src python -m analytics.lalonde_lab --download
