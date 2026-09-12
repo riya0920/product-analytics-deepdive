@@ -439,6 +439,29 @@ The transferable rule is that **overlap is a precondition, not a diagnostic to
 run afterwards**. Every method in that table is correct given its assumptions.
 The assumption that fails is the one nobody writes down.
 
+## Difference-in-differences, and the assumption it rests on
+
+`make did` grades two-way fixed-effects DiD against a **planted** treatment
+effect (tau = 3.0) on a synthetic panel, the same plant-then-score discipline as
+the modules above. DiD's whole claim is **parallel trends**: absent treatment the
+treated and control groups would have moved together, so the control change is a
+valid counterfactual. The module runs it twice:
+
+| scenario | TWFE DiD estimate | bias | 95% CI covers tau | placebo pre-trend |
+| --- | --- | --- | --- | --- |
+| parallel trends holds | +3.08 (se 0.14) | +0.08 | yes | +0.11 |
+| parallel trends violated | +5.48 (se 0.14) | +2.48 | no | +1.31 |
+
+When the assumption holds, DiD recovers tau and a **placebo DiD on the
+pre-period** (where nobody is treated yet, so the true effect is zero) finds
+nothing. When the treated group was already on a different trajectory before
+treatment, DiD is biased by the trend gap — and the placebo pre-trend is
+non-zero, which is the diagnostic that should stop you trusting the estimate. The
+estimator is OLS with unit and period fixed effects and **cluster-robust standard
+errors by unit** (the DiD error is correlated within a unit over time). The
+biased row is reported as-is rather than tuned away, because the point is that the
+method fails loudly, not that it always works.
+
 ## The pipeline
 
 ```
