@@ -2,9 +2,9 @@
 
 Two triggers, one processing path:
 
-* ``on_gcs_finalize`` — a CloudEvent fired when a raw-events file lands in the
+* ``on_gcs_finalize``: a CloudEvent fired when a raw-events file lands in the
   landing bucket (event-driven ingestion).
-* ``scheduled_load`` — a Pub/Sub message from Cloud Scheduler, carrying a date;
+* ``scheduled_load``: a Pub/Sub message from Cloud Scheduler, carrying a date;
   it processes ``events/<date>.jsonl`` (the managed daily orchestration).
 
 Both call ``process_object``: read the NDJSON object, aggregate with the pure

@@ -4,7 +4,7 @@
 
 The same plant-then-score discipline as ``did_lab`` and ``lalonde_lab``. An
 **unobserved confounder** U drives both the treatment D and the outcome Y, so a
-plain OLS of Y on D is biased — it cannot separate the causal effect from the
+plain OLS of Y on D is biased; it cannot separate the causal effect from the
 selection U induces. An **instrument** Z is a variable that moves D but affects Y
 *only through D* (the exclusion restriction) and is independent of U. Two-stage
 least squares uses only the part of D that Z explains, which is U-free, so it
@@ -15,7 +15,7 @@ Three runs on one machine:
 1. **Strong, valid instrument.** OLS is biased; 2SLS recovers beta; the
    first-stage F is well above the Staiger–Stock rule of thumb of 10.
 2. **Weak instrument.** Z barely moves D, the first-stage F collapses below 10,
-   and 2SLS becomes high-variance and unreliable — the diagnostic that says "do
+   and 2SLS becomes high-variance and unreliable; the diagnostic that says "do
    not trust this estimate" fires.
 3. **Exclusion restriction violated.** Z affects Y directly (not only through D),
    so it is not a valid instrument; 2SLS is biased by the direct path even though
@@ -68,7 +68,7 @@ def _ols(X: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, np.ndarray, float]:
 
 
 def ols(d: dict) -> dict:
-    """Naive OLS of Y on D — biased when a confounder drives both."""
+    """Naive OLS of Y on D; biased when a confounder drives both."""
     X = np.column_stack([np.ones_like(d["D"]), d["D"]])
     beta, cov, _ = _ols(X, d["Y"])
     return {"method": "OLS (naive)", "estimate": float(beta[1]),
@@ -160,7 +160,7 @@ def to_markdown(rep: dict) -> str:
         "With a strong valid instrument OLS is biased by the confounder and 2SLS "
         "recovers beta. A weak instrument (first-stage F below 10) makes 2SLS "
         "high-variance and unreliable. When the exclusion restriction is violated "
-        "the instrument is invalid and 2SLS is biased by the direct path — a "
+        "the instrument is invalid and 2SLS is biased by the direct path, a "
         "strong first-stage F does not rescue it."
     )
     return "\n".join(lines)

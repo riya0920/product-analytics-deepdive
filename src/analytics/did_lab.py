@@ -12,7 +12,7 @@ This module does two runs on the same machinery:
 
 1. **Parallel trends holds.** Two-way fixed-effects DiD recovers tau, and a
    placebo test on the pre-period finds no pre-trend.
-2. **Parallel trends is violated** — the treated units are on a different
+2. **Parallel trends is violated**: the treated units are on a different
    underlying trajectory before anyone is treated. DiD is then biased by
    *exactly* that trend gap, and the placebo test catches it. The estimate is
    reported with its bias rather than tuned until it looks right, because a
@@ -185,20 +185,20 @@ def to_markdown(rep: dict) -> str:
         lines.append("| --- | --- | --- | --- | --- |")
         tw = s["twfe"]
         placebo = s["placebo"]["estimate"]
-        placebo_s = "—" if placebo != placebo else f"{placebo:+.2f}"
+        placebo_s = "N/A" if placebo != placebo else f"{placebo:+.2f}"
         covers = tw.get("covers_truth")
         lines.append(
             f"| TWFE DiD | {tw['estimate']:+.2f} (se {tw['se']:.2f}) | {tw['bias']:+.2f} "
             f"| {'yes' if covers else 'no'} | {placebo_s} |"
         )
         lines.append(
-            f"| 2x2 DiD | {s['did_2x2']['estimate']:+.2f} | {s['did_2x2']['bias']:+.2f} | — | |"
+            f"| 2x2 DiD | {s['did_2x2']['estimate']:+.2f} | {s['did_2x2']['bias']:+.2f} | N/A | |"
         )
         lines.append("")
     lines.append(
         "Under parallel trends DiD recovers tau and the placebo pre-trend is ~0. "
         "Under a violation the estimate is biased by the trend gap and the placebo "
-        "pre-trend is non-zero — the diagnostic that would stop you trusting it."
+        "pre-trend is non-zero; the diagnostic that would stop you trusting it."
     )
     return "\n".join(lines)
 

@@ -2,8 +2,8 @@
 
 The schema is defined once, in JSON that both this loader and the Terraform table
 resource read, so the deployed table and the code that writes it cannot drift.
-The table is partitioned by ``event_date`` and clustered by ``channel`` — the two
-predicates a product dashboard filters on — so a day/channel query scans one
+The table is partitioned by ``event_date`` and clustered by ``channel``: the two
+predicates a product dashboard filters on, so a day/channel query scans one
 partition instead of the whole table (and stays inside the BigQuery free tier).
 """
 from __future__ import annotations

@@ -1,11 +1,11 @@
-"""Split events.parquet into daily NDJSON files — the pipeline's raw input.
+"""Split events.parquet into daily NDJSON files: the pipeline's raw input.
 
     python -m cloud.seed_gcs                       # write files under cloud/_landing/events/
     python -m cloud.seed_gcs --upload BUCKET       # also upload to gs://BUCKET/events/
 
 Each ``events/<date>.jsonl`` is what an app's event export would drop into the
 landing bucket; the Cloud Function processes one when it lands (or on schedule).
-Uses data ``analytics.generate`` already produced — no new dataset invented.
+Uses data ``analytics.generate`` already produced; no new dataset invented.
 """
 from __future__ import annotations
 

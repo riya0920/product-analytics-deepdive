@@ -1,7 +1,7 @@
-# Cloud pipeline — events → GCS → Cloud Function → BigQuery (GCP)
+# Cloud pipeline: events → GCS → Cloud Function → BigQuery (GCP)
 
 A cloud-native ELT path over the events this repo already generates
-(`data/events.parquet`, produced by `analytics.generate` — no new dataset
+(`data/events.parquet`, produced by `analytics.generate`; no new dataset
 invented). Raw event files land in Cloud Storage; a Cloud Function aggregates
 them to a daily metrics table in BigQuery; a Cloud Scheduler job drives the daily
 load. Everything is inside the GCP Always-Free tier at this volume.
@@ -38,14 +38,14 @@ scans a few partitions, not the whole table.
 ## IAM
 
 One dedicated service account (`events-pipeline-fn`) runs both functions, with the
-narrowest roles that let the path work — no project-wide data access:
+narrowest roles that let the path work; no project-wide data access:
 
 | Principal | Role | Scope | Why |
 | --- | --- | --- | --- |
 | `events-pipeline-fn` SA | `roles/storage.objectViewer` | landing bucket | read the raw file it was handed |
 | `events-pipeline-fn` SA | `roles/bigquery.dataEditor` | `product_analytics` dataset | write rows into the one table (delete-partition + append) |
 | `events-pipeline-fn` SA | `roles/bigquery.jobUser` | project | run the load/query jobs (narrowest role that permits jobs) |
-| Eventarc/GCS agents | `roles/eventarc.eventReceiver`, `pubsub.publisher` | — | created by the Gen2 trigger; granted at deploy |
+| Eventarc/GCS agents | `roles/eventarc.eventReceiver`, `pubsub.publisher` | N/A | created by the Gen2 trigger; granted at deploy |
 
 The function is **not** a project editor and cannot read other datasets or
 buckets. Cloud Scheduler publishes to the Pub/Sub topic; the function is invoked
@@ -65,11 +65,11 @@ Always-Free monthly allowances comfortably cover this workload:
 | Pub/Sub | 10 GB | kilobytes |
 
 **Expected steady-state cost: $0.** The only way to leave the free tier here is a
-full-table scan on BigQuery without the partition filter — the table is
+full-table scan on BigQuery without the partition filter; the table is
 partitioned precisely to avoid that. (Costs are your responsibility to monitor;
 set a budget alert.)
 
-## Deploy (requires your GCP auth — I cannot run this for you)
+## Deploy (requires your GCP auth: I cannot run this for you)
 
 ```bash
 gcloud auth application-default login
@@ -102,6 +102,6 @@ cd infra && terraform validate          # the IaC is valid HCL
 Built and tested locally: the transform is unit-tested on the real events, the
 function's read→aggregate→load path is tested with the storage and BigQuery
 clients mocked (loaded rows == transform output), and the Terraform validates.
-It has **not** been `terraform apply`-ed to a live project from here — there is no
+It has **not** been `terraform apply`-ed to a live project from here; there is no
 `gcloud`/credentials in this environment, and deploying to your project (with its
 billing and IAM) is your step. The commands above are the whole of it.
